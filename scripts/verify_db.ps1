@@ -50,3 +50,13 @@ else {
 
 # Cleanup
 docker exec $containerName cypher-shell -u neo4j -p password "MATCH (n:BaseNode {id: 'test-id'}) DETACH DELETE n" | Out-Null
+
+# 3. Verify Indexes
+Write-Host "`nVerifying Indexes..."
+$indexes = docker exec $containerName cypher-shell -u neo4j -p password "SHOW INDEXES YIELD name, labelsOrTypes, properties"
+if ($indexes -match "identity_git_url" -and $indexes -match "identity_aws_arn") {
+    Write-Host "Indexes Verified." -ForegroundColor Green
+}
+else {
+    Write-Error "Index Verification Failed: Missing expected indexes."
+}
