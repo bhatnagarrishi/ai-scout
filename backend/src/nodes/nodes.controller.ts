@@ -1,22 +1,14 @@
-import { Controller, Get, Put, Body, HttpException, HttpStatus } from '@nestjs/common';
-import { NodesService } from './nodes.service'; // Service import
+import { Controller, Get, Put, Body } from '@nestjs/common';
+import { NodesService } from './nodes.service';
+import { CreateNodeDto } from './dto/create-node.dto';
 
-
-@Controller()
+@Controller('api/v1')
 export class NodesController {
     constructor(private readonly nodesService: NodesService) { }
 
     @Put('nodes')
-    async createNode(@Body() nodeData: any) {
-        try {
-            // Basic validation (can be enhanced with DTOs)
-            if (!nodeData.kind || !nodeData.metadata || !nodeData.metadata.id) {
-                throw new HttpException('Invalid node data: kind and metadata.id are required', HttpStatus.BAD_REQUEST);
-            }
-            return await this.nodesService.createOrUpdateNode(nodeData);
-        } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    async createNode(@Body() nodeData: CreateNodeDto) {
+        return await this.nodesService.createOrUpdateNode(nodeData);
     }
 
     @Get('graph')

@@ -1,48 +1,74 @@
 import { Injectable } from '@nestjs/common';
 import { Neo4jService } from '../neo4j/neo4j.service';
+import { CreateNodeDto } from './dto/create-node.dto';
 
 @Injectable()
 export class NodesService {
     constructor(private readonly neo4jService: Neo4jService) { }
 
     async createOrUpdateNode(nodeData: any) {
-        const { kind, metadata, spec, status, version_context } = nodeData;
+        // 1. Destructure specific fields
+        const { kind, metadata, spec, status, version_context, parentId } = nodeData;
         const { id, slug, name, labels, identity_aliases } = metadata;
 
-        // Construct Cypher query to merge node
-        // Using MERGE on id to ensure uniqueness
+        // 2. Prepare properties for Searchability (Flattening)
+        // We define a "props" object to hold what we want searchable on the root node
+        const nodeProps = {
+            id,
+            kind,
+            slug: slug || id,
+            name,
+            updated_at: new Date().toISOString(),
+            // FLATTEN these so the Indexes work!
+            // If identity_aliases has 'aws_arn', it becomes n.aws_arn
+            ...identity_aliases
+        };
+
         const cypher = `
+      // A. Merge the Node Identity
       MERGE (n:BaseNode {id: $id})
-      SET n.kind = $kind,
-          n.slug = $slug,
-          n.name = $name,
-          n.labels = $labels,
-          n.identity_aliases = $identity_aliases,
-          n.spec = $spec,
+      
+      // B. Set Searchable Properties (The Rosetta Stone)
+      SET n += $nodeProps 
+      // This updates id, slug, name, and flattened aliases
+      
+      // C. Set Complex Data (Spec/Status can remain serialized for now if huge)
+      SET n.labels = $labels, 
+          n.spec = $spec, 
           n.status = $status,
-          n.version_context = $version_context,
-          n.updated_at = datetime()
-      // Add specific label based on kind
+          n.version_context = $version_context
+      
+      // D. Apply Dynamic Label (e.g., :System, :Container)
       WITH n
       CALL apoc.create.addLabels(n, [$kind]) YIELD node
+      
+      // E. Handle Hierarchy (The "Contains" Edge)
+      // This is conditional: Only runs if $parentId is provided
+      WITH n
+      CALL apoc.do.when(
+        $parentId IS NOT NULL,
+        'MATCH (p:BaseNode {id: $parentId}) MERGE (p)-[:CONTAINS]->(n) RETURN p',
+        'RETURN n',
+        {parentId: $parentId, n:n}
+      ) YIELD value
+      
       RETURN n
     `;
 
         const params = {
             id,
             kind,
-            slug: slug || id, // Fallback to id if slug is missing
-            name,
+            nodeProps, // Passed as a native object (Neo4j driver handles this)
+            parentId: parentId || null, // Ensure null if undefined
+
+            // Complex objects: We can keep these stringified for now 
+            // OR pass as native Maps if you want to query inside them later.
+            // For now, let's keep stringify for spec/status to keep it simple.
             labels: JSON.stringify(labels || {}),
-            identity_aliases: JSON.stringify(identity_aliases || {}),
             spec: JSON.stringify(spec || {}),
             status: JSON.stringify(status || {}),
             version_context: JSON.stringify(version_context || {})
         };
-
-        // Note: Storing complex objects as JSON strings for simplicity in this phase.
-        // In a real graph, we might want to explode these into properties or separate nodes.
-        // Also using APOC to add dynamic labels.
 
         const result = await this.neo4jService.write(cypher, params);
         return result.records[0].get('n').properties;
