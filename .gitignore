@@ -1,0 +1,24 @@
+# Docker
+data/
+docker-compose.override.yml
+
+# Neo4j
+logs/
+plugins/
+import/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
