@@ -1,14 +1,14 @@
 /**
- * Project Cortex - Multi-View Graph Visualization
+ * Project Cortex - Multi-View Graph Visualization with Custom Infrastructure Nodes
  * 
- * This component provides three different views of the system architecture:
- * 1. LOGICAL (C4): Shows high-level architecture (Platforms, Systems, Containers)
- * 2. PHYSICAL (Infra): Shows infrastructure and deployment (Containers, Infrastructure Resources)
- * 3. ALL (Full Trace): Shows complete graph with all nodes and relationships
- * 
- * The component fetches data once and applies client-side filtering for performance.
+ * Features:
+ * - Three view modes: LOGICAL (C4 architecture), PHYSICAL (infrastructure), ALL (complete graph)
+ * - Custom infrastructure nodes with multiple connection handles for inverted hierarchy
+ * - Smart edge routing based on relationship types and node kinds
+ * - Client-side filtering for performance (fetch once, filter on demand)
+ * - Hierarchical auto-layout using Dagre algorithm
  */
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import ReactFlow, {
   Controls,
   Background,
@@ -23,68 +23,115 @@ import axios from 'axios';
 import 'reactflow/dist/style.css';
 
 import { getLayoutedElements } from './layout';
+import InfraNode from './infranode';
 
-// Color scheme for different node types (C4 model inspired)
-const colors: Record<string, string> = {
-  PLATFORM: '#ffecd1',
-  SYSTEM: '#d1e8ff',
-  CONTAINER: '#d1ffdb',
-  INFRA_RESOURCE: '#e0e0e0'
+/**
+ * Custom node type registry
+ * INFRA_RESOURCE nodes use the InfraNode component with multiple connection handles
+ * Other node types (PLATFORM, SYSTEM, CONTAINER) use default React Flow nodes
+ */
+const nodeTypes = {
+  INFRA_RESOURCE: InfraNode,
 };
 
+/**
+ * Color scheme for standard (non-infrastructure) nodes
+ * Infrastructure nodes handle their own styling in the InfraNode component
+ */
+const colors: Record<string, string> = {
+  PLATFORM: '#ffecd1',  // Light orange - highest abstraction
+  SYSTEM: '#d1e8ff',    // Light blue - system boundaries
+  CONTAINER: '#d1ffdb', // Light green - deployable units
+};
+
+/**
+ * View modes control which nodes and edges are visible:
+ * - LOGICAL: Software architecture view (hides infrastructure)
+ * - PHYSICAL: Infrastructure deployment view (hides abstract groupings)
+ * - ALL: Complete graph with all nodes and relationships
+ */
 type ViewMode = 'LOGICAL' | 'PHYSICAL' | 'ALL';
 
 export default function App() {
-  // React Flow state management
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [viewMode, setViewMode] = useState<ViewMode>('ALL');
 
-  // Cache the full graph data to enable fast client-side filtering without re-fetching
+  // Cache full graph data to enable fast client-side filtering without re-fetching
   const fullGraphData = useRef<{ nodes: any[], edges: any[] }>({ nodes: [], edges: [] });
 
   /**
    * Fetches the complete graph from the backend API.
-   * This is called once on component mount.
+   * Called once on component mount.
    */
   const fetchGraph = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/v1/graph');
       const { nodes: rawNodes, relationships: rawRels } = response.data;
 
-      // Transform API -> Internal Format
+      // Transform Neo4j nodes into React Flow format
       const allNodes = rawNodes.map((n: any) => ({
         id: n.properties.id,
-        // We add 'kind' to data so we can filter by it easily later
+        // Use custom InfraNode component for infrastructure, default for others
+        type: n.properties.kind === 'INFRA_RESOURCE' ? 'INFRA_RESOURCE' : 'default',
         data: {
           label: `${n.properties.kind}\n${n.properties.name}`,
-          kind: n.properties.kind
+          kind: n.properties.kind,  // Used for view mode filtering
+          name: n.properties.name   // Used by custom node component
         },
-        style: {
+        // Standard nodes get inline styles, custom nodes handle their own
+        style: n.properties.kind !== 'INFRA_RESOURCE' ? {
           background: colors[n.properties.kind] || '#fff',
           border: '1px solid #777',
           fontSize: 12,
           width: 180,
           borderRadius: 5
-        },
-        position: { x: 0, y: 0 }
+        } : undefined,
+        position: { x: 0, y: 0 }  // Will be calculated by layout algorithm
       }));
 
-      // Transform Neo4j relationships into React Flow edges
-      const allEdges = rawRels.map((r: any) => ({
-        id: `e-${r.start}-${r.end}`,
-        source: r.start,
-        target: r.end,
-        label: r.type,  // Relationship type: CONTAINS, HOSTED_ON, etc.
-        type: 'smoothstep',
-        markerEnd: { type: MarkerType.ArrowClosed },
-        animated: r.type === 'HOSTED_ON'  // Visual emphasis for infrastructure relationships
-      }));
+      /**
+       * Transform Neo4j relationships into React Flow edges with smart handle routing.
+       * 
+       * Handle routing logic for infrastructure nodes:
+       * - HOSTED_ON: Software → Infrastructure (connects to target-top)
+       * - CONTAINS/PROTECTS/ROUTES_TO: Parent Infra → Child Infra (connects to target-bottom)
+       * 
+       * This enables inverted hierarchy where child infrastructure appears above parents.
+       */
+      const allEdges = rawRels.map((r: any) => {
+        let targetHandle = null;
+        let sourceHandle = null;
 
-      // Cache the complete graph for client-side filtering
+        // Check if target node is infrastructure
+        const targetIsInfra = rawNodes.find((n: any) => n.properties.id === r.end)?.properties.kind === 'INFRA_RESOURCE';
+
+        if (targetIsInfra) {
+          if (r.type === 'HOSTED_ON') {
+            // Software components connect to top of infrastructure nodes
+            targetHandle = 'target-top';
+          } else if (r.type === 'CONTAINS' || r.type === 'PROTECTS' || r.type === 'ROUTES_TO') {
+            // Parent infrastructure connects to bottom of child infrastructure (inverted hierarchy)
+            targetHandle = 'target-bottom';
+          }
+          // Infrastructure nodes emit connections from their top handle
+          sourceHandle = 'source-top';
+        }
+
+        return {
+          id: `e-${r.start}-${r.end}`,
+          source: r.start,
+          target: r.end,
+          label: r.type,
+          type: 'smoothstep',
+          markerEnd: { type: MarkerType.ArrowClosed },
+          animated: r.type === 'HOSTED_ON',
+          sourceHandle: sourceHandle,
+          targetHandle: targetHandle
+        };
+      });
+
       fullGraphData.current = { nodes: allNodes, edges: allEdges };
-
-      // Render initial view (all nodes)
       applyFilterAndLayout('ALL', allNodes, allEdges);
 
     } catch (error) {
@@ -92,86 +139,54 @@ export default function App() {
     }
   };
 
-  /**
-   * Core filtering and layout engine.
-   * Pipeline: Filter nodes/edges by view mode -> Apply layout algorithm -> Update state
-   * 
-   * @param mode - The view mode to apply
-   * @param nodesSource - Source nodes to filter from
-   * @param edgesSource - Source edges to filter from
-   */
   const applyFilterAndLayout = (mode: ViewMode, nodesSource: any[], edgesSource: any[]) => {
     let filteredNodes = [];
     let filteredEdges = [];
 
     if (mode === 'ALL') {
-      // Full Trace: Show everything
       filteredNodes = nodesSource;
       filteredEdges = edgesSource;
-    }
-    else if (mode === 'LOGICAL') {
-      // C4-style logical architecture view
-      // Show: PLATFORM, SYSTEM, CONTAINER (software architecture)
-      // Hide: INFRA_RESOURCE (infrastructure details)
+    } else if (mode === 'LOGICAL') {
       filteredNodes = nodesSource.filter(n => n.data.kind !== 'INFRA_RESOURCE');
-
-      // Hide infrastructure relationships (HOSTED_ON) to focus on logical containment
       filteredEdges = edgesSource.filter(e => e.label !== 'HOSTED_ON');
-    }
-    else if (mode === 'PHYSICAL') {
-      // Infrastructure deployment view
-      // Show: CONTAINER, INFRA_RESOURCE (what runs where)
-      // Hide: PLATFORM, SYSTEM (abstract groupings)
+    } else if (mode === 'PHYSICAL') {
       filteredNodes = nodesSource.filter(n =>
         n.data.kind === 'INFRA_RESOURCE' || n.data.kind === 'CONTAINER'
       );
-
-      // Only show edges between visible nodes (removes orphaned edges)
       const validNodeIds = new Set(filteredNodes.map(n => n.id));
       filteredEdges = edgesSource.filter(e =>
         validNodeIds.has(e.source) && validNodeIds.has(e.target)
       );
     }
 
-    // Apply hierarchical layout algorithm to the filtered graph
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
       filteredNodes,
       filteredEdges
     );
 
-    // Update React Flow state to trigger re-render
     setNodes(layoutedNodes);
     setEdges(layoutedEdges);
   };
 
-  /**
-   * Handles view mode changes from UI buttons.
-   * Re-filters and re-layouts the cached graph data.
-   */
   const handleModeChange = (mode: ViewMode) => {
     setViewMode(mode);
     applyFilterAndLayout(mode, fullGraphData.current.nodes, fullGraphData.current.edges);
   };
 
-  // Fetch graph data on component mount
   useEffect(() => {
     fetchGraph();
   }, []);
 
-  // Allow users to manually create edges in the UI (optional feature)
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
 
-  /**
-   * Dynamic button styles - highlights the active view mode
-   */
   const btnStyle = (mode: ViewMode) => ({
     padding: '8px 16px',
     marginRight: '5px',
     cursor: 'pointer',
-    backgroundColor: viewMode === mode ? '#333' : '#fff',  // Dark when active
+    backgroundColor: viewMode === mode ? '#333' : '#fff',
     color: viewMode === mode ? '#fff' : '#333',
     border: '1px solid #333',
     borderRadius: '4px',
@@ -183,6 +198,7 @@ export default function App() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes} // Register custom node
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -190,20 +206,12 @@ export default function App() {
       >
         <Controls />
         <Background color="#aaa" gap={16} />
-
-        {/* View Mode Selector Panel */}
         <Panel position="top-center">
           <div style={{ background: 'rgba(255,255,255,0.8)', padding: 10, borderRadius: 8 }}>
             <span style={{ marginRight: 10, fontWeight: 'bold' }}>View Mode:</span>
-            <button style={btnStyle('LOGICAL')} onClick={() => handleModeChange('LOGICAL')}>
-              Logical (C4)
-            </button>
-            <button style={btnStyle('PHYSICAL')} onClick={() => handleModeChange('PHYSICAL')}>
-              Physical (Infra)
-            </button>
-            <button style={btnStyle('ALL')} onClick={() => handleModeChange('ALL')}>
-              Full Trace
-            </button>
+            <button style={btnStyle('LOGICAL')} onClick={() => handleModeChange('LOGICAL')}>Logical</button>
+            <button style={btnStyle('PHYSICAL')} onClick={() => handleModeChange('PHYSICAL')}>Physical</button>
+            <button style={btnStyle('ALL')} onClick={() => handleModeChange('ALL')}>Full</button>
           </div>
         </Panel>
       </ReactFlow>

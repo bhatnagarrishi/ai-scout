@@ -1,19 +1,27 @@
 /**
  * Auto-layout utility using Dagre algorithm for hierarchical graph visualization.
  * 
+ * This module handles the automatic positioning of nodes in a hierarchical layout,
+ * with special support for inverted infrastructure hierarchies where child nodes
+ * appear above their parents.
+ * 
  * Note: We use 'type' imports for Edge and Node to avoid naming conflicts with
- * the built-in DOM Node type (from @types/node). This ensures TypeScript correctly
- * resolves to ReactFlow's Node type which has the 'id' property.
+ * the built-in DOM Node type (from @types/node).
  */
 import dagre from 'dagre';
-import { Position, type Edge, type Node } from 'reactflow';
+import { type Node, type Edge, Position } from 'reactflow';
 
-// Standard dimensions for all nodes in the graph
-const nodeWidth = 180;
+// Node dimensions used by the layout algorithm
+const nodeWidth = 200;
 const nodeHeight = 80;
 
 /**
  * Applies hierarchical layout to React Flow nodes and edges using Dagre.
+ * 
+ * Features:
+ * - Top-to-bottom hierarchical layout
+ * - Inverted hierarchy support for infrastructure (children above parents)
+ * - Configurable spacing between nodes and ranks
  * 
  * @param nodes - Array of React Flow nodes to layout
  * @param edges - Array of React Flow edges defining connections
@@ -24,31 +32,58 @@ export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
     const dagreGraph = new dagre.graphlib.Graph();
     dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-    // Configure layout: 'TB' = Top to Bottom (hierarchical/tree layout)
-    // Alternative options: 'LR' (Left to Right), 'BT' (Bottom to Top), 'RL' (Right to Left)
-    dagreGraph.setGraph({ rankdir: 'TB' });
+    // Configure layout algorithm
+    // rankdir: 'TB' = Top to Bottom
+    // ranksep: Vertical spacing between ranks (levels)
+    // nodesep: Horizontal spacing between nodes on the same rank
+    dagreGraph.setGraph({ rankdir: 'TB', ranksep: 80, nodesep: 50 });
 
-    // Register all nodes with their dimensions in the Dagre graph
+    // Register all nodes with their dimensions
     nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
     });
 
-    // Register all edges (connections) in the Dagre graph
+    /**
+     * Register edges with special handling for infrastructure hierarchy.
+     * 
+     * For infrastructure CONTAINS relationships, we invert the edge direction
+     * in the layout algorithm (but not in the visual rendering) to achieve
+     * an inverted hierarchy where:
+     * - EC2 Instance appears at the top
+     * - VPC appears in the middle
+     * - AWS Region appears at the bottom
+     * 
+     * This creates a more intuitive visualization where detailed resources
+     * are shown above their containing infrastructure.
+     */
     edges.forEach((edge) => {
-        dagreGraph.setEdge(edge.source, edge.target);
+        const sourceNode = nodes.find((n) => n.id === edge.source);
+
+        // Detect infrastructure hierarchy edges that should be inverted
+        const isInfraHierarchy =
+            sourceNode?.data?.kind === 'INFRA_RESOURCE' &&
+            edge.label === 'CONTAINS';  // e.g., Region CONTAINS VPC
+
+        if (isInfraHierarchy) {
+            // Invert the edge for layout calculation (child above parent)
+            dagreGraph.setEdge(edge.target, edge.source);
+        } else {
+            // Normal edge direction
+            dagreGraph.setEdge(edge.source, edge.target);
+        }
     });
 
-    // Execute the layout algorithm - this calculates positions for all nodes
+    // Execute the layout algorithm - calculates positions for all nodes
     dagre.layout(dagreGraph);
 
-    // Map the calculated positions back to React Flow nodes
+    // Map calculated positions back to React Flow nodes
     const layoutedNodes = nodes.map((node) => {
         const nodeWithPosition = dagreGraph.node(node.id);
         return {
             ...node,
-            // Configure edge connection points for hierarchical flow
-            targetPosition: Position.Top,    // Edges enter from top
-            sourcePosition: Position.Bottom, // Edges exit from bottom
+            // Default connection positions (custom nodes can override with specific handles)
+            targetPosition: Position.Top,
+            sourcePosition: Position.Bottom,
             position: {
                 // Dagre returns center coordinates, adjust for top-left positioning
                 x: nodeWithPosition.x - nodeWidth / 2,

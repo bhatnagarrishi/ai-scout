@@ -75,29 +75,40 @@ export class NodesService {
     }
 
     async getGraph() {
+        // We fetch the start node UUID and end node UUID explicitly
         const cypher = `
       MATCH (n:BaseNode)
-      OPTIONAL MATCH (n)-[r]->(m)
-      RETURN collect(distinct n) as nodes, collect(distinct r) as relationships
+      OPTIONAL MATCH (n)-[r]->(m:BaseNode)
+      RETURN collect(distinct n) as nodes, 
+             collect(distinct {
+                source: n.id, 
+                target: m.id, 
+                type: type(r),
+                id: elementId(r)
+             }) as relationships
     `;
 
         const result = await this.neo4jService.read(cypher);
-        if (result.records.length === 0) {
-            return { nodes: [], relationships: [] };
-        }
+
+        // Safety check
+        if (result.records.length === 0) return { nodes: [], relationships: [] };
 
         const nodes = result.records[0].get('nodes').map((node: any) => ({
             id: node.properties.id,
             labels: node.labels,
             properties: node.properties
         }));
-        const relationships = result.records[0].get('relationships').map((rel: any) => ({
-            id: rel.identity.toString(),
-            start: rel.start.toString(),
-            end: rel.end.toString(),
-            type: rel.type,
-            properties: rel.properties
-        }));
+
+        // Now relationships already contain the UUIDs as 'source' and 'target'
+        // Filter out nulls (where n has no relationships)
+        const relationships = result.records[0].get('relationships')
+            .filter(r => r.target !== null)
+            .map((rel: any) => ({
+                id: rel.id,
+                start: rel.source, // Using UUID now
+                end: rel.target,   // Using UUID now
+                type: rel.type
+            }));
 
         return { nodes, relationships };
     }
