@@ -21,6 +21,10 @@
       "item": "The project explains how to perform unit testing using Python's unittest.mock module.",
       "weight": 1,
       "reason": "Legacy entry (reason not recorded)"
+    },
+    {
+      "item": "The project is a tool for concurrently downloading economic data.",
+      "weight": 1
     }
   ]
 }
