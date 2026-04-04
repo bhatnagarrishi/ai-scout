@@ -17,6 +17,10 @@
     {
       "item": "The project explains how to perform unit testing using Python's unittest.mock module.",
       "weight": 1
+    },
+    {
+      "item": "This project develops a concurrent downloader for economic data.",
+      "weight": 1
     }
   ]
 }
