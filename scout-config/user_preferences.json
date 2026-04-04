@@ -1,22 +1,26 @@
 {
   "positive_preferences": [
     {
-      "description": "Projects that provide interactive tools for visualizing data, especially those related to MCP.",
-      "weight": 1
+      "weight": 1,
+      "item": "Projects that provide interactive tools for visualizing data, especially those related to MCP.",
+      "reason": "Legacy entry (reason not recorded)"
     },
     {
       "item": "An interactive tool designed for visualizing data in MCP projects.",
-      "weight": 1
+      "weight": 1,
+      "reason": "Legacy entry (reason not recorded)"
     },
     {
       "item": "The project involves integrating interactive tools, likely related to MCP (Microsoft Certified Professional) technologies.",
-      "weight": 1
+      "weight": 1,
+      "reason": "Legacy entry (reason not recorded)"
     }
   ],
   "negative_constraints": [
     {
       "item": "The project explains how to perform unit testing using Python's unittest.mock module.",
-      "weight": 1
+      "weight": 1,
+      "reason": "Legacy entry (reason not recorded)"
     }
   ]
 }
