@@ -1,19 +1,28 @@
-# Docker
-data/
-docker-compose.override.yml
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+*.egg
 
-# Neo4j
-logs/
-plugins/
-import/
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
 
-# Node.js
-node_modules/
-npm-debug.log
-yarn-error.log
+# Environment variables / secrets
 .env
+.env.*
+*.pem
+*.key
 
-# IDEs
+# IDE
 .vscode/
 .idea/
 *.swp
