@@ -1,7 +1,7 @@
 {
   "positive_preferences": [
     {
-      "summary": "Projects involving interactive MCP tools for data visualization.",
+      "item": "Projects involving the integration of interactive Master Control Panel (MCP) tools.",
       "weight": 1
     }
   ],
