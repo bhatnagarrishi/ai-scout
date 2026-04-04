@@ -21,6 +21,11 @@
       "item": "The project explains how to perform unit testing using Python's unittest.mock module.",
       "weight": 1,
       "reason": "Not interested in unit testing projects"
+    },
+    {
+      "item": "The project is a tool for concurrently downloading economic data.",
+      "weight": 1,
+      "reason": "Unknown (Inferred reason from legacy sync)"
     }
   ]
 }
