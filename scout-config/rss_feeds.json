@@ -1,22 +1,27 @@
 [
   {
     "name": "RealPython",
-    "url": "https://realpython.com/atom.xml?format=xml"
+    "url": "https://realpython.com/atom.xml?format=xml",
+    "active": true
   },
   {
     "name": "OpenAI News",
-    "url": "https://openai.com/news/rss.xml"
+    "url": "https://openai.com/news/rss.xml",
+    "active": true
   },
   {
     "name": "Stability AI",
-    "url": "https://stability.ai/news?format=rss"
+    "url": "https://stability.ai/news?format=rss",
+    "active": true
   },
   {
     "name": "Anthropic",
-    "url": "https://www.anthropic.com/feed.xml"
+    "url": "https://www.anthropic.com/feed.xml",
+    "active": true
   },
   {
     "name": "Google AI Blog",
-    "url": "https://blog.google/technology/ai/rss/"
+    "url": "https://blog.google/technology/ai/rss/",
+    "active": true
   }
 ]
