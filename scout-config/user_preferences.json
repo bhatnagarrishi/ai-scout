@@ -28,7 +28,8 @@
       "reason": "Although interesting, its too low level and narrow use case. There is no specific tool that I would learn from this, except using AI to code"
     },
     {
-      "item": "The project focuses on mocking external API dependencies within Python applications.",
+      "item": "This project teaches how to use Python's unittest.mock to simulate external API responses for reliable unit testing of AI-driven logic.",
+      "reason": "User is not interested in unit tests.",
       "weight": 1
     }
   ]
