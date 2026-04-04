@@ -1,13 +1,1 @@
-{
-  "positive_preferences": [],
-  "negative_constraints": [
-    {
-      "description": "project is too simplistic",
-      "weight": 1
-    },
-    {
-      "description": "project does not leverage AI capabilities of the model",
-      "weight": 1
-    }
-  ]
-}
+{"positive_preferences": [], "negative_constraints": []}
