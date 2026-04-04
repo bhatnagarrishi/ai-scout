@@ -23,8 +23,8 @@
       "type": "n8n-nodes-base.githubTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        -336,
+        -96
       ],
       "id": "0b81345a-9152-4bd9-b95a-b0726fb2459d",
       "name": "Github Trigger",
@@ -33,6 +33,25 @@
         "githubApi": {
           "id": "jRovgKIx19abru0d",
           "name": "ai-scout"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        640,
+        128
+      ],
+      "id": "d73dd0db-17e4-4413-8c8a-2f892270a5a1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "rFJhrkoIRxubcbz7",
+          "name": "Google Gemini(PaLM) Api account"
         }
       }
     },
@@ -48,7 +67,7 @@
           "conditions": [
             {
               "id": "58dc7544-9fc5-477d-9476-8300e79950e1",
-              "leftValue": "={{ $json.body.issue.labels.some(l => l.name === 'rejected' || l.name === 'approved') }}",
+              "leftValue": "={{ $json.body.issue.labels.some(l => l.name === 'rejected' || l.name === 'approved' || l.name === 'more-like-this') }}",
               "rightValue": "rejected",
               "operator": {
                 "type": "boolean",
@@ -64,11 +83,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        432,
-        0
+        -112,
+        -96
       ],
       "id": "08481688-5944-4533-8c4b-c870da4b4496",
-      "name": "If"
+      "name": "Identify keyword in issue label"
     },
     {
       "parameters": {
@@ -93,11 +112,11 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        720,
-        -16
+        112,
+        -96
       ],
       "id": "ecb1d128-7d84-4884-9994-3462e402912f",
-      "name": "Get a file",
+      "name": "Get user preference file",
       "webhookId": "f6b0c337-e5a9-41f2-983c-86d4d0666bcb",
       "credentials": {
         "githubApi": {
@@ -108,12 +127,25 @@
     },
     {
       "parameters": {
+        "jsCode": "const decodedContent = Buffer.from($json.content, 'base64').toString('utf8');\nreturn { json: JSON.parse(decodedContent) };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -96
+      ],
+      "id": "1d362803-a9e3-4397-97cb-42ea8899ef6c",
+      "name": "Decode user preference file"
+    },
+    {
+      "parameters": {
         "promptType": "define",
-        "text": "=Historical Memory: {{ Buffer.from($json.content, 'base64').toString('utf8') }}\n\nNew Project Title: {{ $('Github Trigger').item.json.body.issue.title }}\nNew Rejection Reason: {{ $('Github Trigger').item.json.body.comment.body }}\n\nLabel: {{ $('Github Trigger').item.json.body.label.name }}",
+        "text": "=Project Title: {{ $('Github Trigger').item.json.body.issue.title }}\nUser Feedback: {{ $('Github Trigger').item.json.body.label ? $('Github Trigger').item.json.body.label.name : $('Github Trigger').item.json.body.comment.body }}\n",
         "messages": {
           "messageValues": [
             {
-              "message": "You are a Memory Manager. You will receive the current memory JSON and a new GitHub comment. The label on the issue tells you what to do:  If the label is rejected: update the negative_constraints array (merge duplicates, increase weight). If the label is approved or more-like-this: add to the positive_preferences array (merge duplicates, increase weight). Output ONLY the complete, updated, strictly valid JSON object. CRITICAL: Output ONLY raw JSON with no markdown, no code fences, no backticks. The first character of your response must be { and the last must be }."
+              "message": "You are an AI Feedback Classifier. Based on the User Feedback and Project Title, determine the constraint.  RULES: 1. If the User Feedback is \"more-like-this\" or positive, the target array is \"positive_preferences\". 2. If the User Feedback is \"reject\" or negative, the target is \"negative_constraints\". 3. Write a crisp 1-sentence summary of the Project focusing on the core technology.  OUTPUT FORMAT: You must output ONLY a valid JSON object matching this exact schema, with no markdown formatting: {   \"target\": \"positive_preferences\",   \"item\": \"<your 1 sentence summary>\" }"
             }
           ]
         },
@@ -122,30 +154,24 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        416,
-        176
+        560,
+        -96
       ],
       "id": "fb3efffd-4b79-49ab-8efe-0d9ba21b18e1",
-      "name": "Basic LLM Chain"
+      "name": "LLM classifies user feedback"
     },
     {
       "parameters": {
-        "options": {}
+        "jsCode": "// 1. Get the Historical Memory (Decode Base64)\nconst currentJsonRaw = Buffer.from($('Get user preference file').item.json.content, 'base64').toString('utf8');\nlet memory = JSON.parse(currentJsonRaw);\n\n// 2. Safely parse Gemini's output (Strip Markdown if necessary)\nlet LLMOutput = $('LLM classifies user feedback').item.json.text;\nif (LLMOutput.startsWith('```json')) {\n    LLMOutput = LLMOutput.replace(/```json/g, '').replace(/```/g, '');\n}\nconst newFeedback = JSON.parse(LLMOutput.trim());\n\n// 3. Deterministic Push Logic\nconst targetArray = newFeedback.target; // Routes to positive or negative\nconst newItemText = newFeedback.item;\n\n// Prevent identical duplicate items, increment weight instead\nlet found = false;\nfor (let rule of memory[targetArray]) {\n    if (rule.item === newItemText) {\n        rule.weight = (rule.weight || 1) + 1;\n        found = true; break;\n    }\n}\nif (!found) {\n    memory[targetArray].push({ item: newItemText, weight: 1 });\n}\n\n// 4. Send beautiful, safe JSON to the next node!\nreturn { json: { file_content: JSON.stringify(memory, null, 2) } };\n"
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        464,
-        352
+        912,
+        -96
       ],
-      "id": "d73dd0db-17e4-4413-8c8a-2f892270a5a1",
-      "name": "Google Gemini Chat Model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "rFJhrkoIRxubcbz7",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
+      "id": "e6fac5a5-73d1-4141-86ce-cace9dea7460",
+      "name": "Update user feedback in preference file"
     },
     {
       "parameters": {
@@ -164,17 +190,17 @@
           "cachedResultUrl": "https://github.com/bhatnagarrishi/ai-scout"
         },
         "filePath": "scout-config/user_preferences.json",
-        "fileContent": "={{ $json.text }}",
-        "commitMessage": "={{ $('Get a file').item.json.sha }}"
+        "fileContent": "={{ $json.file_content }}",
+        "commitMessage": "={{ $('Get user preference file').item.json.sha }}"
       },
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        768,
-        176
+        1136,
+        -96
       ],
       "id": "d7ab44d0-a4b3-437f-bf33-8be40d95d963",
-      "name": "Edit a file",
+      "name": "Update user preference file",
       "webhookId": "dd1f6667-2436-46dc-84c1-3190a581f9f2",
       "credentials": {
         "githubApi": {
@@ -190,18 +216,7 @@
       "main": [
         [
           {
-            "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If": {
-      "main": [
-        [
-          {
-            "node": "Get a file",
+            "node": "Identify keyword in issue label",
             "type": "main",
             "index": 0
           }
@@ -212,29 +227,62 @@
       "ai_languageModel": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "LLM classifies user feedback",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "Get a file": {
+    "Identify keyword in issue label": {
       "main": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "Get user preference file",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Basic LLM Chain": {
+    "Get user preference file": {
       "main": [
         [
           {
-            "node": "Edit a file",
+            "node": "Decode user preference file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decode user preference file": {
+      "main": [
+        [
+          {
+            "node": "LLM classifies user feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM classifies user feedback": {
+      "main": [
+        [
+          {
+            "node": "Update user feedback in preference file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update user feedback in preference file": {
+      "main": [
+        [
+          {
+            "node": "Update user preference file",
             "type": "main",
             "index": 0
           }
@@ -248,7 +296,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "0579c9b7-7378-4283-b66b-7e3c21f5fb89",
+  "versionId": "5aa1909b-cfc2-465b-9d68-e39185ccb0d2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5a12ff2ec3c83de85fbf0f876515566da46b19733d02a0620f8f6adc00f08a88"
