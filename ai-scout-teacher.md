@@ -97,27 +97,54 @@ Add an **AI Agent Node** (or Basic LLM Node) with the following System Prompt:
 > 
 > **Filter Criteria:** Evaluate if the content describes a new model, library, tool, or technique that can be tested/implemented in Python within 3 hours. Reject news about funding, policy, or generic 'hype.'
 > 
-> **Output Requirement:** ALWAYS output a strictly valid JSON object exactly matching this format:
+> **Output Requirement:** ALWAYS output a strictly valid JSON object exactly matching this format (if Rejected, put "N/A" for project fields):
 > {
 >   "status": "Accepted or Rejected",
 >   "reasoning": "1 sentence explaining why",
->   "project_title": "Title of the project (if Accepted, else \"N/A\")",
->   "tech_stack": "Specific libraries/APIs (if Accepted, else \"N/A\")",
->   "action_plan": "5 steps to build a Proof of Concept (if Accepted, else \"N/A\")",
->   "github_repo_name": "slugified-title (if Accepted, else \"N/A\")"
+>   "project_title": "Title of the project",
+>   "objective": "1-2 sentences explaining exactly what is being built and why it matters",
+>   "source": "e.g., OpenAI, Anthropic, HuggingFace, etc.",
+>   "area": "e.g., Image Generation, Agentic AI, RAG, Core Coding",
+>   "tech_stack": "e.g., Python, FastAPI, LangChain",
+>   "prerequisites": "e.g., OpenAI API Key, Local GPU",
+>   "difficulty": "Beginner, Intermediate, or Advanced",
+>   "estimated_time": "e.g., 2 hours",
+>   "action_plan": "5 exact, actionable steps to build the Proof of Concept",
+>   "github_repo_name": "slugified-title"
 > }"
 
-### Step 4: GitHub Integration
+### Step 4: Deduplication & Guardrails (Upsert Pattern)
 
-1.  Add a **GitHub Node** to the workflow.
+To avoid generating duplicate issues when RSS feeds are repeated, we use an Upsert block.
 
-2.  Set the Action to `Create an Issue` or `Create a Repository`.
+1.  **Get Open Issues:** Add a **GitHub Node** after the AI Brain. Set Operation to `Issue -> Get Many`, State to `open`.
+2.  **Cross-Reference:** Add a **Code Node** to check if the current news URL exists in any open issue body:
+    ```javascript
+    const currentUrl = $('Merge Node').first().json.link;
+    const openIssues = $input.all().map(i => i.json);
+    const matchingIssue = openIssues.find(issue => issue.body && issue.body.includes(currentUrl));
+    
+    if (matchingIssue) {
+        return [{ json: { exists: true, issue_number: matchingIssue.number } }];
+    } else {
+        return [{ json: { exists: false } }];
+    }
+    ```
+3.  **Route with If Node:** Add an **If** node with condition `{{ $json.exists }} === true`.
+    *   **True Branch:** Use GitHub Node `Update` targeting `{{ $json.issue_number }}`.
+    *   **False Branch:** Use GitHub Node `Create` (see Step 5).
 
-3.  Map the AI-generated JSON fields to the GitHub Issue body.
+### Step 5: GitHub Integration (Issue Creation)
 
-4.  (Optional) Add a **Slack or Discord Node** to send yourself a message when a new project is created.
+1.  On the False branch of your Deduplication node, add a **GitHub Node** to `Create` an issue.
+2.  Map your AI's JSON fields into a nicely formatted Markdown layout in the issue body.
+3.  **CRITICAL:** Append the original RSS URL as a hidden HTML comment at the very bottom of the issue body. This powers the guardrail!
+    ```html
+    <!-- source_url: {{ $('Merge Node').item.json.link }} -->
+    ```
+4.  (Optional) Add a Slack/Discord notification node.
 
-### Step 5: The Execution Workflow (Manual)
+### Step 6: The Execution Workflow (Manual)
 
 1.  Upon notification, open the GitHub Issue.
 
@@ -135,7 +162,7 @@ Add an **AI Agent Node** (or Basic LLM Node) with the following System Prompt:
 
 5.  `git commit -m "Project complete"` and push.
 
-### Step 6: Smart Agentic Memory Loop
+### Step 7: Smart Agentic Memory Loop
 
 To make the AI Scout truly intelligent, we use a secondary Gemini Agent to continually rewrite its own memory file based on Github feedback:
 
