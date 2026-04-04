@@ -1,9 +1,9 @@
 {
-  "positive_preferences": [
+  "positive_preferences": [],
+  "negative_constraints": [
     {
-      "item": "Projects involving the integration of interactive Master Control Panel (MCP) tools.",
+      "description": "Unit testing, particularly using `unittest.mock`.",
       "weight": 1
     }
-  ],
-  "negative_constraints": []
+  ]
 }
