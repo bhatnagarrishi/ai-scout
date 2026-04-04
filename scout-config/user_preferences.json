@@ -1,9 +1,9 @@
 {
-  "positive_preferences": [
+  "positive_preferences": [],
+  "negative_constraints": [
     {
-      "item": "Projects that provide interactive tools for visualizing data, especially those related to MCP.",
+      "description": "Focus on unit testing using Python's unittest.mock library.",
       "weight": 1
     }
-  ],
-  "negative_constraints": []
+  ]
 }
