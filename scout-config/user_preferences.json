@@ -1,1 +1,9 @@
-{"positive_preferences": [{"item": "Projects utilizing the `zipfile` module for archive manipulation.", "weight": 1}, {"item": "Projects focused on creating interactive command-line interfaces using `click`.", "weight": 1}, {"item": "Exploring the creation of custom generators in Python.", "weight": 1}, {"item": "Exploring techniques for formatting output in Python using f-strings.", "weight": 1}], "negative_constraints": [{"item": "Projects focused on utilizing Python's functools module for higher-order functions.", "weight": 1}, {"item": "Projects that heavily rely on the usage of Python's super() function in class inheritance.", "weight": 1}, {"item": "Content discussing the intricacies of Python's decorators, their implementation, and use cases.", "weight": 1}, {"item": "Projects centered around implementing custom context managers in Python.", "weight": 1}, {"item": "Projects focused on using `asyncio` for asynchronous programming.", "weight": 1}, {"item": "Projects focused on implementing unit tests and the pytest framework.", "weight": 2}]}
+{
+  "positive_preferences": [
+    {
+      "item": "Projects that provide interactive tools for visualizing data, especially those related to MCP.",
+      "weight": 1
+    }
+  ],
+  "negative_constraints": []
+}
