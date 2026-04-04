@@ -1,9 +1,1 @@
-{
-  "positive_preferences": [],
-  "negative_constraints": [
-    {
-      "item": "This project focuses on the integration of an interactive tool for Master Control Program.",
-      "weight": 1
-    }
-  ]
-}
+{"positive_preferences": [{"description": "Develop an interactive tool for integrating MCP systems.", "weight": 1}], "negative_constraints": []}
