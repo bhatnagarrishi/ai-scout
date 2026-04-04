@@ -62,16 +62,16 @@ Each POC folder is self-contained and follows this convention:
 - [ ] Python 3.10+ with `pip`
 
 ### Launching the Agent (One Command)
+1. **Initialize .env**: Copy `.env.example` to `.env` and fill in your API keys and `NGROK_DOMAIN`.
+2. **Run**:
 ```powershell
 .\start.ps1
 ```
 This script automatically:
-- Starts the Ngrok static tunnel (port 5678)
-- Sets `WEBHOOK_URL` so n8n generates correct public webhook URLs
-- Sets `N8N_RESTRICT_FILE_ACCESS_TO` to allow n8n to read/write `scout-config/`
-- Boots n8n
-
-> **Note:** Replace the Ngrok domain inside `start.ps1` with your own claimed static domain.
+- Reads your `NGROK_DOMAIN` from `.env`.
+- Starts the Ngrok static tunnel (port 5678).
+- Sets `WEBHOOK_URL` for n8n to generate public URLs.
+- Boots n8n.
 
 ---
 

@@ -74,10 +74,9 @@ The system follows a **"Signal-to-Action"** philosophy:
 
 1.  **Install Ngrok:** `npm install -g ngrok`, then authenticate: `ngrok config add-authtoken <your-token>`.
 2.  **Claim a Static Domain:** In your Ngrok dashboard, go to **Domains** and claim your free static domain.
-3.  **Update `start.ps1`:** Replace the placeholder Ngrok domain in `start.ps1` with your own static domain.
-4.  **Launch everything:** Run `.\start.ps1` — it will open the Ngrok tunnel in a separate window and boot n8n with three critical env variables pre-configured:
-    *   `WEBHOOK_URL` — your public Ngrok address so GitHub webhooks reach n8n.
-    *   `N8N_RESTRICT_FILE_ACCESS_TO` — whitelists `scout-config/` so n8n can read/write the memory JSON.
+3.  **Setup .env:** Copy `.env.example` to `.env` and enter your `NGROK_DOMAIN` (e.g. `your-domain.ngrok-free.dev`).
+4.  **Launch everything:** Run `.\start.ps1` — it handles variables for you:
+    *   `WEBHOOK_URL` — automatically set based on your `NGROK_DOMAIN`.
 5.  **Open n8n:** Visit `http://localhost:5678`.
 
 ### Step 2: Configure Data Sources
