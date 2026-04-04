@@ -1,4 +1,3 @@
-```json
 {
   "positive_preferences": [],
   "negative_constraints": [
@@ -8,4 +7,3 @@
     }
   ]
 }
-```
