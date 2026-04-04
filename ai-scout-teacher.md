@@ -79,15 +79,13 @@ The system follows a **"Signal-to-Action"** philosophy:
     *   `WEBHOOK_URL` — automatically set based on your `NGROK_DOMAIN`.
 5.  **Open n8n:** Visit `http://localhost:5678`.
 
-### Step 2: Configure Data Sources
+### Step 2: Configure Data Sources (Git Driven)
 
-1.  **RSS Nodes:** Add one RSS node for each source. 
+Instead of hardcoding URLs in the n8n canvas, the feeds are maintained securely in your Git repository.
 
-    *   Example: `https://openai.com/news/rss.xml`
-
-2.  **YouTube Node:** Connect the YouTube node using your API key. Add the channel IDs for the specified creators.
-
-3.  **Merge Node:** Connect all source nodes into a "Merge" node to create a single stream of data.
+1.  **Git Configuration Component**: Add a **GitHub Node** (`Get File`) immediately after your trigger, fetching `scout-config/rss_feeds.json`.
+2.  **Code Node Parser**: Pass the GitHub text response through a **Code Node** to parse the Base64 JSON array natively into n8n array items.
+3.  **Dynamic RSS Loop**: Add a single **RSS Node**. Set its URL field to expression `{{ $json.url }}` so it autonomously fetches every feed you register in GitHub!
 
 ### Step 3: Ingestion Pre-Flight Filter (Memory)
 
