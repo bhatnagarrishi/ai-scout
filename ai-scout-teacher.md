@@ -42,7 +42,7 @@ The system follows a **"Signal-to-Action"** philosophy:
 
 *   **Orchestration:** [n8n](https://n8n.io/) (Self-hosted via npm or Docker).
 
-*   **Brain (LLM):** Claude 3.5 Sonnet (preferred for coding/logic) or GPT-4o.
+*   **Brain (LLM):** Google Gemini 3.1 Flash Lite (via Google AI Studio pay-as-you-go API).
 
 *   **Data Sources:** 
 
@@ -58,6 +58,8 @@ The system follows a **"Signal-to-Action"** philosophy:
 
 - [ ] **n8n Local:** Installed and running locally via Node.js (`npx n8n`) or Docker.
 
+- [ ] **Ngrok (Static Tunnel):** Installed globally (`npm install -g ngrok`), authenticated, and configured with a static free domain. Local webhooks (GitHub) fail on standard tunnels like localtunnel due to anti-phishing splash screens.
+
 - [ ] **Anthropic/OpenAI API Key:** Funded with a small amount (e.g., $5-$10) for LLM reasoning.
 
 - [ ] **GitHub Personal Access Token (PAT):** With permissions for `repo` and `workflow`.
@@ -68,11 +70,15 @@ The system follows a **"Signal-to-Action"** philosophy:
 
 ## 6. Detailed Steps
 
-### Step 1: Initialize the n8n Workflow
+### Step 1: Initialize the Tunnels & Environment
 
-1.  Open n8n and create a new workflow titled "AI Scout & Mentor."
-
-2.  Add a **Schedule Trigger** set to run once every 24 hours (or manually for testing).
+1.  **Install Ngrok:** `npm install -g ngrok`, then authenticate: `ngrok config add-authtoken <your-token>`.
+2.  **Claim a Static Domain:** In your Ngrok dashboard, go to **Domains** and claim your free static domain.
+3.  **Update `start.ps1`:** Replace the placeholder Ngrok domain in `start.ps1` with your own static domain.
+4.  **Launch everything:** Run `.\start.ps1` — it will open the Ngrok tunnel in a separate window and boot n8n with three critical env variables pre-configured:
+    *   `WEBHOOK_URL` — your public Ngrok address so GitHub webhooks reach n8n.
+    *   `N8N_RESTRICT_FILE_ACCESS_TO` — whitelists `scout-config/` so n8n can read/write the memory JSON.
+5.  **Open n8n:** Visit `http://localhost:5678`.
 
 ### Step 2: Configure Data Sources
 
@@ -90,13 +96,17 @@ Add an **AI Agent Node** (or Basic LLM Node) with the following System Prompt:
 
 > "You are an AI Master Instructor. I will provide you with titles and summaries from AI news and tutorials. 
 > 
-> **Filter Criteria:** Only proceed if the content describes a new model, library, tool, or technique that can be tested/implemented in Python within 3 hours. Reject news about funding, policy, or generic 'hype.'
+> **Filter Criteria:** Evaluate if the content describes a new model, library, tool, or technique that can be tested/implemented in Python within 3 hours. Reject news about funding, policy, or generic 'hype.'
 > 
-> **Output Requirement:** For accepted items, generate a JSON object:
-> 1. Project Title
-> 2. Tech Stack (Specific libraries/APIs)
-> 3. Action Plan (5 steps to build a Proof of Concept)
-> 4. GitHub repo name (A slugified version of the title)"
+> **Output Requirement:** ALWAYS output a strictly valid JSON object exactly matching this format:
+> {
+>   "status": "Accepted or Rejected",
+>   "reasoning": "1 sentence explaining why",
+>   "project_title": "Title of the project (if Accepted, else \"N/A\")",
+>   "tech_stack": "Specific libraries/APIs (if Accepted, else \"N/A\")",
+>   "action_plan": "5 steps to build a Proof of Concept (if Accepted, else \"N/A\")",
+>   "github_repo_name": "slugified-title (if Accepted, else \"N/A\")"
+> }"
 
 ### Step 4: GitHub Integration
 
@@ -125,5 +135,17 @@ Add an **AI Agent Node** (or Basic LLM Node) with the following System Prompt:
     *   One "Key Insight" learned during the build.
 
 5.  `git commit -m "Project complete"` and push.
+
+### Step 6: Smart Agentic Memory Loop
+
+To make the AI Scout truly intelligent, we use a secondary Gemini Agent to continually rewrite its own memory file based on Github feedback:
+
+1.  **Memory Schema:** `scout-config/user_preferences.json` in this GitHub repo stores weighted negative constraints and positive preferences. GitHub serves as the persistent storage layer (version-controlled, no file system permissions required).
+2.  **Memory Consolidation Workflow (n8n):** 
+    *   **Trigger:** GitHub Webhook listens for `issue_comment` events on issues labeled `rejected`.
+    *   **GitHub Node (Read):** Reads `scout-config/user_preferences.json` contents via `Get File Contents` operation. The file content is base64 encoded — decode via `Buffer.from($json.content, 'base64').toString('utf8')`.
+    *   **Memory Agent (Gemini):** Takes the decoded JSON and the new GitHub comment, semantically de-duplicates the reason, and increments `weight` if it matches an existing constraint.
+    *   **GitHub Node (Write):** Updates the file via `Edit File` operation, passing the SHA from the Read step to prevent conflicts. Commits as `chore: update memory preferences [automated]`.
+3.  **Brain Injection (Main Workflow):** The master Scout workflow reads `user_preferences.json` via GitHub node before calling Gemini, injecting memory as constraints in the system prompt.
 
 ---

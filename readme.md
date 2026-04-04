@@ -9,10 +9,11 @@
 | Stage | What happens |
 |---|---|
 | **Scout** | n8n monitors RSS feeds & YouTube channels for new AI releases |
-| **Filter** | An LLM discards hype and flags only implementable technology |
+| **Filter** | Gemini Flash Lite discards hype and flags only implementable technology |
 | **Projectize** | Every signal becomes a structured 3-hour coding exercise |
 | **Build** | POC is built locally and committed to this repo |
 | **Learn** | Key insights are captured in each POC's `README.md` |
+| **Feedback** | Rejected issues feed a Smart Memory agent that adapts future filtering |
 
 ---
 
@@ -20,12 +21,16 @@
 
 ```
 /
-├── README.md               ← You are here
-├── ai-scout-teacher.md     ← Full project blueprint & n8n workflow guide
+├── README.md                    ← You are here
+├── ai-scout-teacher.md          ← Full project blueprint & n8n workflow guide
+├── start.ps1                    ← One-click launcher: starts Ngrok + n8n
+├── scout-config/
+│   ├── config.yaml              ← Centralized settings (model, RSS feeds, etc.)
+│   └── user_preferences.json   ← Smart memory bank (auto-managed by Gemini)
 └── pocs/
-    └── <poc-name>/         ← One folder per POC (auto-named by the agent)
-        ├── README.md       ← What, how, and key insight
-        └── ...             ← Source code / notebooks
+    └── <poc-name>/              ← One folder per POC (auto-named by the agent)
+        ├── README.md            ← What, how, and key insight
+        └── ...                  ← Source code / notebooks
 ```
 
 Each POC folder is self-contained and follows this convention:
@@ -38,21 +43,35 @@ Each POC folder is self-contained and follows this convention:
 
 ## Tech Stack
 
-- **Orchestration**: [n8n](https://n8n.io/) (Desktop or self-hosted)
-- **LLM Brain**: Claude 3.5 Sonnet / GPT-4o
-- **Data Sources**: OpenAI, Anthropic, Google AI, TLDR AI blogs + YouTube (Karpathy, Dave Ebbelaar, Everyday AI)
+- **Orchestration**: [n8n](https://n8n.io/) (self-hosted via `npx n8n`)
+- **LLM Brain**: Google Gemini 3.1 Flash Lite (via Google AI Studio Pay-As-You-Go)
+- **Tunnel**: [Ngrok](https://ngrok.com/) with a static free domain (required for GitHub webhooks)
+- **Data Sources**: RSS feeds (OpenAI, Anthropic, Google AI, TLDR AI, Real Python, etc.)
 - **Language**: Python (venv or Jupyter)
 - **Tracking**: GitHub Issues → POC folders in this repo
+- **Smart Memory**: `user_preferences.json` auto-managed by a secondary Gemini Memory Agent
 
 ---
 
 ## Pre-requisites
 
-- [ ] n8n Desktop installed
-- [ ] Anthropic or OpenAI API key
-- [ ] GitHub Personal Access Token (`repo` + `workflow` scopes)
-- [ ] Google Cloud / YouTube Data API key *(optional)*
+- [ ] **n8n** installed via Node.js: `npm install -g n8n`
+- [ ] **Ngrok** installed globally: `npm install -g ngrok` — authenticated and with a **static free domain** claimed in the Ngrok dashboard
+- [ ] **Google AI Studio** API key (Gemini) — upgrade to Pay-As-You-Go to bypass 15 RPM free tier limits
+- [ ] **GitHub Personal Access Token** with full `repo` scope (required for private repos)
 - [ ] Python 3.10+ with `pip`
+
+### Launching the Agent (One Command)
+```powershell
+.\start.ps1
+```
+This script automatically:
+- Starts the Ngrok static tunnel (port 5678)
+- Sets `WEBHOOK_URL` so n8n generates correct public webhook URLs
+- Sets `N8N_RESTRICT_FILE_ACCESS_TO` to allow n8n to read/write `scout-config/`
+- Boots n8n
+
+> **Note:** Replace the Ngrok domain inside `start.ps1` with your own claimed static domain.
 
 ---
 

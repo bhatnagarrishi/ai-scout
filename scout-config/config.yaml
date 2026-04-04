@@ -1,0 +1,43 @@
+# AI Scout & Mentor - Configuration
+
+# --------------------------
+# Model Preferences
+# --------------------------
+models:
+  # The main intelligence used for filtering and planning projects
+  primary_brain: "gemini-3.1-flash-lite-preview"
+  # Fallback in case of rate limits or API issues
+  fallback_brain: "gpt-4o"
+  # Settings
+  temperature: 0.2
+  max_tokens: 4096
+
+# --------------------------
+# Data Sources
+# --------------------------
+sources:
+  rss_feeds:
+    - name: "OpenAI News"
+      url: "https://openai.com/news/rss.xml"
+    - name: "Stability AI"
+      url: "https://stability.ai/news?format=rss"
+    - name: "Anthropic"
+      url: "https://www.anthropic.com/feed.xml"
+    - name: "Google AI Blog"
+      url: "https://blog.google/technology/ai/rss/"
+      
+  youtube_channels:
+    - name: "Andrej Karpathy"
+      channel_id: "UC14Lnv_N4I" # Example placeholder
+    - name: "Dave Ebbelaar"
+      channel_id: "UCx_Ebb" # Example placeholder
+    - name: "Everyday AI"
+      channel_id: "UCEvey" # Example placeholder
+
+# --------------------------
+# GitHub Settings
+# --------------------------
+github:
+  # Do we want the agent to automatically create Issues or complete Repos?
+  output_type: "Issue" # "Issue" or "Repository"
+  target_repo: "bhatnagarrishi/ai-scout-missions"

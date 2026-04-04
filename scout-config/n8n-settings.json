@@ -1,0 +1,12 @@
+{
+  "description": "Configuration and environment settings for the n8n Scout Workflow",
+  "n8n_version": "latest",
+  "environment": {
+    "N8N_BASIC_AUTH_ACTIVE": "false",
+    "WEBHOOK_URL": "http://localhost:5678",
+    "GENERIC_TIMEZONE": "America/New_York"
+  },
+  "workflow_files": [
+    "./scout_workflow_export.json"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "positive_preferences": [],
+  "negative_constraints": [
+    {
+      "core_reason": "Too simple or generic API wrapper",
+      "weight": 1,
+      "examples": ["OpenAI Wrapper Demo"]
+    }
+  ]
+}
