@@ -26,5 +26,7 @@ Write-Host "Starting Ngrok Tunnel for $domain..." -ForegroundColor Cyan
 Start-Process "ngrok" -ArgumentList "http --domain=$domain 5678"
 
 Write-Host "Booting up n8n engine..." -ForegroundColor Green
-$env:WEBHOOK_URL = "https://$domain"
+if (-not $env:WEBHOOK_URL) {
+    $env:WEBHOOK_URL = "https://$domain"
+}
 npx n8n
