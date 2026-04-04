@@ -1,0 +1,22 @@
+[
+  {
+    "name": "RealPython",
+    "url": "https://realpython.com/atom.xml?format=xml"
+  },
+  {
+    "name": "OpenAI News",
+    "url": "https://openai.com/news/rss.xml"
+  },
+  {
+    "name": "Stability AI",
+    "url": "https://stability.ai/news?format=rss"
+  },
+  {
+    "name": "Anthropic",
+    "url": "https://www.anthropic.com/feed.xml"
+  },
+  {
+    "name": "Google AI Blog",
+    "url": "https://blog.google/technology/ai/rss/"
+  }
+]
