@@ -1,9 +1,1 @@
-{
-  "positive_preferences": [
-    {
-      "item": "Projects focused on interactive MCP tools for data visualization.",
-      "weight": 1
-    }
-  ],
-  "negative_constraints": []
-}
+{"positive_preferences": [{"description": "An interactive tool for visualizing data in MCP projects.", "weight": 1}], "negative_constraints": []}
