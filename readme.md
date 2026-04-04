@@ -87,8 +87,6 @@ To replicate the AI Scout logic in your own n8n instance:
 
 ## POC Log
 
-| # | Folder | Topic | Status |
-|---|--------|-------|--------|
-| — | — | *No POCs yet — waiting for first Scout run* | — |
+| 1 | [mcp-interactive-tool](./pocs/mcp-interactive-tool) | Interactive MCP Tool Integration (Issue #51) | Completed (Protocol Verified) |
 
 > Update this table as POCs are added.
