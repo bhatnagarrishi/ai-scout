@@ -40,7 +40,7 @@ The system follows a **"Signal-to-Action"** philosophy:
 
 ## 4. Tech Stack
 
-*   **Orchestration:** [n8n](https://n8n.io/) (Desktop or Self-hosted).
+*   **Orchestration:** [n8n](https://n8n.io/) (Self-hosted via npm or Docker).
 
 *   **Brain (LLM):** Claude 3.5 Sonnet (preferred for coding/logic) or GPT-4o.
 
@@ -56,7 +56,7 @@ The system follows a **"Signal-to-Action"** philosophy:
 
 ## 5. Pre-requisites
 
-- [ ] **n8n Desktop:** Installed on your local machine.
+- [ ] **n8n Local:** Installed and running locally via Node.js (`npx n8n`) or Docker.
 
 - [ ] **Anthropic/OpenAI API Key:** Funded with a small amount (e.g., $5-$10) for LLM reasoning.
 
