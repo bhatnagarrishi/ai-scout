@@ -1,10 +1,10 @@
-```json
 {
-  "Project lacks complexity or AI/ML integration": {
-    "weight": 1,
-    "examples": [
-      "Concurrent File Downloader"
-    ]
-  }
+  "positive_preferences": [],
+  "negative_constraints": [
+    {
+      "core_reason": "Project lacks complexity or AI/ML integration",
+      "weight": 1,
+      "examples": ["Concurrent File Downloader"]
+    }
+  ]
 }
-```
