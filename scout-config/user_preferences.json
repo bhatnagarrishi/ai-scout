@@ -7,6 +7,10 @@
     {
       "item": "An interactive tool designed for visualizing data in MCP projects.",
       "weight": 1
+    },
+    {
+      "item": "The project involves integrating interactive tools, likely related to MCP (Microsoft Certified Professional) technologies.",
+      "weight": 1
     }
   ],
   "negative_constraints": [
