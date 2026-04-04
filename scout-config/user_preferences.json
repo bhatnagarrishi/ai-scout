@@ -2,9 +2,12 @@
   "positive_preferences": [],
   "negative_constraints": [
     {
-      "core_reason": "Project lacks complexity or AI/ML integration",
-      "weight": 1,
-      "examples": ["Concurrent File Downloader"]
+      "description": "project is too simplistic",
+      "weight": 1
+    },
+    {
+      "description": "project does not leverage AI capabilities of the model",
+      "weight": 1
     }
   ]
 }
