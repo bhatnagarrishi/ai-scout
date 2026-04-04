@@ -9,5 +9,10 @@
       "weight": 1
     }
   ],
-  "negative_constraints": []
+  "negative_constraints": [
+    {
+      "item": "The project explains how to perform unit testing using Python's unittest.mock module.",
+      "weight": 1
+    }
+  ]
 }
