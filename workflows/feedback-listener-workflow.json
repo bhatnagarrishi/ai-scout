@@ -1,0 +1,258 @@
+{
+  "name": "Feedback Listener",
+  "nodes": [
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "bhatnagarrishi",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "ai-scout",
+          "mode": "list",
+          "cachedResultName": "ai-scout",
+          "cachedResultUrl": "https://github.com/bhatnagarrishi/ai-scout"
+        },
+        "events": [
+          "issue_comment"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0b81345a-9152-4bd9-b95a-b0726fb2459d",
+      "name": "Github Trigger",
+      "webhookId": "d45676fe-723c-4cc2-a113-04e4f589f3be",
+      "credentials": {
+        "githubApi": {
+          "id": "jRovgKIx19abru0d",
+          "name": "ai-scout"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "58dc7544-9fc5-477d-9476-8300e79950e1",
+              "leftValue": "={{ $json.body.issue.labels.some(l => l.name === 'rejected' || l.name === 'approved') }}",
+              "rightValue": "rejected",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        0
+      ],
+      "id": "08481688-5944-4533-8c4b-c870da4b4496",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "bhatnagarrishi",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "ai-scout",
+          "mode": "list",
+          "cachedResultName": "ai-scout",
+          "cachedResultUrl": "https://github.com/bhatnagarrishi/ai-scout"
+        },
+        "filePath": "scout-config/user_preferences.json",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        -16
+      ],
+      "id": "ecb1d128-7d84-4884-9994-3462e402912f",
+      "name": "Get a file",
+      "webhookId": "f6b0c337-e5a9-41f2-983c-86d4d0666bcb",
+      "credentials": {
+        "githubApi": {
+          "id": "jRovgKIx19abru0d",
+          "name": "ai-scout"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Historical Memory: {{ Buffer.from($json.content, 'base64').toString('utf8') }}\n\nNew Project Title: {{ $('Github Trigger').item.json.body.issue.title }}\nNew Rejection Reason: {{ $('Github Trigger').item.json.body.comment.body }}\n\nLabel: {{ $('Github Trigger').item.json.body.label.name }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a Memory Manager. You will receive the current memory JSON and a new GitHub comment. The label on the issue tells you what to do:  If the label is rejected: update the negative_constraints array (merge duplicates, increase weight). If the label is approved or more-like-this: add to the positive_preferences array (merge duplicates, increase weight). Output ONLY the complete, updated, strictly valid JSON object. CRITICAL: Output ONLY raw JSON with no markdown, no code fences, no backticks. The first character of your response must be { and the last must be }."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        416,
+        176
+      ],
+      "id": "fb3efffd-4b79-49ab-8efe-0d9ba21b18e1",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        352
+      ],
+      "id": "d73dd0db-17e4-4413-8c8a-2f892270a5a1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "rFJhrkoIRxubcbz7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "bhatnagarrishi",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "ai-scout",
+          "mode": "list",
+          "cachedResultName": "ai-scout",
+          "cachedResultUrl": "https://github.com/bhatnagarrishi/ai-scout"
+        },
+        "filePath": "scout-config/user_preferences.json",
+        "fileContent": "={{ $json.text }}",
+        "commitMessage": "={{ $('Get a file').item.json.sha }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        176
+      ],
+      "id": "d7ab44d0-a4b3-437f-bf33-8be40d95d963",
+      "name": "Edit a file",
+      "webhookId": "dd1f6667-2436-46dc-84c1-3190a581f9f2",
+      "credentials": {
+        "githubApi": {
+          "id": "jRovgKIx19abru0d",
+          "name": "ai-scout"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0579c9b7-7378-4283-b66b-7e3c21f5fb89",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5a12ff2ec3c83de85fbf0f876515566da46b19733d02a0620f8f6adc00f08a88"
+  },
+  "id": "vKuWigCfP4d3n9ou",
+  "tags": []
+}

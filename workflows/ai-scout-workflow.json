@@ -1,0 +1,377 @@
+{
+  "name": "AI Scout + Mentor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        -224
+      ],
+      "id": "4ba059b8-0ba7-4ead-85b3-10e3eee096cd",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://realpython.com/atom.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        -224
+      ],
+      "id": "f6dafdeb-eee3-4b83-b49e-bcde50413e76",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.title }}{{ $json.contentSnippet }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "\"You are an AI Master Instructor. I will provide you with titles and summaries from AI news and tutorials.  Filter Criteria: Evaluate if the content describes a new model, library, tool, or technique that can be tested/implemented in Python within 3 hours. Reject news about funding, policy, or generic 'hype.'  > **Output Requirement:** ALWAYS output a strictly valid JSON object exactly matching this format: > { >   \"status\": \"Accepted or Rejected\", >   \"reasoning\": \"1 sentence explaining why\", >   \"project_title\": \"Title of the project\", >   \"objective\": \"1-2 sentences explaining exactly what is being built and why it matters\", >   \"source\": \"e.g., OpenAI, Anthropic, HuggingFace, etc.\", >   \"area\": \"e.g., Image Generation, Agentic AI, RAG, Core Coding\", >   \"tech_stack\": \"e.g., Python, FastAPI, LangChain\", >   \"prerequisites\": \"e.g., OpenAI API Key, Local GPU\", >   \"difficulty\": \"Beginner, Intermediate, or Advanced\", >   \"estimated_time\": \"e.g., 2 hours\", >   \"action_plan\": \"5 exact, actionable steps to build the Proof of Concept\", >   \"github_repo_name\": \"slugified-title\" > }"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -32,
+        48
+      ],
+      "id": "a5e58715-bd5d-440c-810d-be71e7825ae0",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite-preview",
+        "options": {
+          "maxOutputTokens": 4096,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        256
+      ],
+      "id": "51209b58-2384-4484-b6ee-8e4a67b512be",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "rFJhrkoIRxubcbz7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 30
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -224
+      ],
+      "id": "97910e2f-3ab2-4a1d-9056-382cb325b52d",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8c21733e-f2f6-41e9-a50d-2b3f4b58dacc",
+              "leftValue": "={{ JSON.parse($json.text).status }}",
+              "rightValue": "Accepted",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "64649465-ad6b-4621-a7be-5e8a6a4f2ba3",
+              "leftValue": "={{ JSON.parse($('Basic LLM Chain').item.json.text).objective }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        288,
+        48
+      ],
+      "id": "cd33a68f-6b78-4cef-8ecb-8c34b81b9888",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "bhatnagarrishi",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "ai-scout",
+          "mode": "list",
+          "cachedResultName": "ai-scout",
+          "cachedResultUrl": "https://github.com/bhatnagarrishi/ai-scout"
+        },
+        "title": "={{ JSON.parse($('Basic LLM Chain').item.json.text).project_title }}",
+        "body": "=### 🎯 Objective\n{{ JSON.parse($('Basic LLM Chain').item.json.text).objective }}\n\n---\n**🏭 Source:** {{ JSON.parse($('Basic LLM Chain').item.json.text).source }}\n**🧩 Area:** {{ JSON.parse($('Basic LLM Chain').item.json.text).area }}\n**⚙️ Tech Stack:** {{ JSON.parse($('Basic LLM Chain').item.json.text).tech_stack }}\n**🔑 Prerequisites:** {{ JSON.parse($('Basic LLM Chain').item.json.text).prerequisites }}\n**🔥 Difficulty:** {{ JSON.parse($('Basic LLM Chain').item.json.text).difficulty }} | **⏱️ Time:** {{ JSON.parse($('Basic LLM Chain').item.json.text).estimated_time }}\n\n---\n### 🛠️ Action Plan\n{{ Array.isArray(JSON.parse($('Basic LLM Chain').item.json.text).action_plan) ? JSON.parse($('Basic LLM Chain').item.json.text).action_plan.join('\\n\\n') : JSON.parse($('Basic LLM Chain').item.json.text).action_plan }}\n\n<!-- source_url: {{ $('RSS Read').item.json.link || $('RSS Read').item.json.id }} -->\n",
+        "labels": [],
+        "assignees": []
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        256
+      ],
+      "id": "e6964cd9-fd26-4fbc-b6bc-365a7d1d81a1",
+      "name": "Create an issue",
+      "webhookId": "45f03d2b-afa9-4131-80be-785b2d4b1cf0",
+      "credentials": {
+        "githubApi": {
+          "id": "jRovgKIx19abru0d",
+          "name": "Cortex-Private"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9de60ce4-7df2-4ecc-abb5-944be0d77225",
+              "leftValue": "={{ $json.total_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        944,
+        -16
+      ],
+      "id": "1ade23a0-d6e9-4c31-8431-2f622e16b757",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/search/issues?q=repo:bhatnagarrishi/ai-scout+is:open+is:issue+\"{{ $('RSS Read').item.json.link \n\n $('Merge Node').item.json.id }}\"",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        496,
+        -48
+      ],
+      "id": "ee82278d-812e-4be8-bdce-aae9a4c7bf69",
+      "name": "HTTP Request",
+      "credentials": {
+        "githubApi": {
+          "id": "jRovgKIx19abru0d",
+          "name": "ai-scout"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "bhatnagarrishi",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "ai-scout",
+          "mode": "list",
+          "cachedResultName": "ai-scout",
+          "cachedResultUrl": "https://github.com/bhatnagarrishi/ai-scout"
+        },
+        "issueNumber": "={{ $json.items[0].number }}",
+        "editFields": {
+          "body": "=### 🎯 Objective\n{{ JSON.parse($('Basic LLM Chain').item.json.text).objective }}\n\n---\n**🏭 Source:** {{ JSON.parse($('Basic LLM Chain').item.json.text).source }}\n**🧩 Area:** {{ JSON.parse($('Basic LLM Chain').item.json.text).area }}\n**⚙️ Tech Stack:** {{ JSON.parse($('Basic LLM Chain').item.json.text).tech_stack }}\n**🔑 Prerequisites:** {{ JSON.parse($('Basic LLM Chain').item.json.text).prerequisites }}\n**🔥 Difficulty:** {{ JSON.parse($('Basic LLM Chain').item.json.text).difficulty }} | **⏱️ Time:** {{ JSON.parse($('Basic LLM Chain').item.json.text).estimated_time }}\n\n---\n### 🛠️ Action Plan\n{{ Array.isArray(JSON.parse($('Basic LLM Chain').item.json.text).action_plan) ? JSON.parse($('Basic LLM Chain').item.json.text).action_plan.join('\\n\\n') : JSON.parse($('Basic LLM Chain').item.json.text).action_plan }}\n\n<!-- source_url: {{ $('RSS Read').item.json.link || $('RSS Read').item.json.id }} -->\n",
+          "title": "={{ JSON.parse($('Basic LLM Chain').item.json.text).project_title }}"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        -112
+      ],
+      "id": "d0bd3bfd-64a0-4acf-b6bd-0058f23fcb40",
+      "name": "Edit an issue",
+      "webhookId": "61fd0c53-7652-48b4-9340-61e935071f2d",
+      "credentials": {
+        "githubApi": {
+          "id": "jRovgKIx19abru0d",
+          "name": "ai-scout"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Edit an issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create an issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "dd91e45f-520f-4343-831f-a6fcfdbd3de7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5a12ff2ec3c83de85fbf0f876515566da46b19733d02a0620f8f6adc00f08a88"
+  },
+  "id": "8zdTRXyEFCSZ8FuL",
+  "tags": []
+}
