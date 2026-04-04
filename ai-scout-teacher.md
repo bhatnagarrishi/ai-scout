@@ -89,7 +89,16 @@ The system follows a **"Signal-to-Action"** philosophy:
 
 3.  **Merge Node:** Connect all source nodes into a "Merge" node to create a single stream of data.
 
-### Step 3: The AI Brain (Filtering & Planning)
+### Step 3: Ingestion Pre-Flight Filter (Memory)
+
+Before spending tokens on the AI Brain, completely filter out RSS items that have already been evaluated in past runs.
+
+1.  Add a **GitHub Node** (`Get File`) immediately after the RSS Merge node to pull `scout-config/ingested_urls.json`.
+2.  Add a **Code Node** to check if the current article's URL is perfectly contained in the JSON array. If it is, halt the branch.
+3.  At the very end of the main workflow, securely capture the evaluated URLs using an **Aggregate Node** to avoid race conditions.
+4.  Use a **Code Node** to push the bundled URLs into the historical list, and write it back to `scout-config/ingested_urls.json` via GitHub `Update File`.
+
+### Step 4: The AI Brain (Filtering & Planning)
 
 Add an **AI Agent Node** (or Basic LLM Node) with the following System Prompt:
 
@@ -113,7 +122,7 @@ Add an **AI Agent Node** (or Basic LLM Node) with the following System Prompt:
 >   "github_repo_name": "slugified-title"
 > }"
 
-### Step 4: Deduplication & Guardrails (Upsert Pattern)
+### Step 5: Deduplication & Guardrails (Upsert Pattern)
 
 To avoid generating duplicate issues when RSS feeds are repeated, we use an Upsert block.
 
@@ -134,7 +143,7 @@ To avoid generating duplicate issues when RSS feeds are repeated, we use an Upse
     *   **True Branch:** Use GitHub Node `Update` targeting `{{ $json.issue_number }}`.
     *   **False Branch:** Use GitHub Node `Create` (see Step 5).
 
-### Step 5: GitHub Integration (Issue Creation)
+### Step 6: GitHub Integration (Issue Creation)
 
 1.  On the False branch of your Deduplication node, add a **GitHub Node** to `Create` an issue.
 2.  Map your AI's JSON fields into a nicely formatted Markdown layout in the issue body.
@@ -144,7 +153,7 @@ To avoid generating duplicate issues when RSS feeds are repeated, we use an Upse
     ```
 4.  (Optional) Add a Slack/Discord notification node.
 
-### Step 6: The Execution Workflow (Manual)
+### Step 7: The Execution Workflow (Manual)
 
 1.  Upon notification, open the GitHub Issue.
 
@@ -162,7 +171,7 @@ To avoid generating duplicate issues when RSS feeds are repeated, we use an Upse
 
 5.  `git commit -m "Project complete"` and push.
 
-### Step 7: Smart Agentic Memory Loop
+### Step 8: Smart Agentic Memory Loop
 
 To make the AI Scout truly intelligent, we use a secondary Gemini Agent to continually rewrite its own memory file based on Github feedback:
 
