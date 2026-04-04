@@ -27,6 +27,9 @@
 ├── scout-config/
 │   ├── config.yaml              ← Centralized settings (model, RSS feeds, etc.)
 │   └── user_preferences.json   ← Smart memory bank (auto-managed by Gemini)
+├── workflows/
+│   ├── ai-scout-workflow.json           ← AI Project Scout (Main Workflow)
+│   └── feedback-listener-workflow.json  ← Memory Manager (Updates preferences)
 └── pocs/
     └── <poc-name>/              ← One folder per POC (auto-named by the agent)
         ├── README.md            ← What, how, and key insight
@@ -71,7 +74,14 @@ This script automatically:
 - Reads your `NGROK_DOMAIN` from `.env`.
 - Starts the Ngrok static tunnel (port 5678).
 - Sets `WEBHOOK_URL` for n8n to generate public URLs.
-- Boots n8n.
+- Boot n8n.
+
+### Importing the Workflow Architecture
+You can find the master n8n workflow in `workflows/ai-scout-workflow.json`. Git automatically manages its version history!
+To replicate the AI Scout logic in your own n8n instance:
+1. Open n8n (`http://localhost:5678`)
+2. Go to **Workflows** → **Add Workflow**
+3. Click the menu `...` in the top right → **Import from File**, and select the JSON.
 
 ---
 
