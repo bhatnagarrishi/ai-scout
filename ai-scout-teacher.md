@@ -1,168 +1,129 @@
-This is the blueprint for your personal \*\*AI Scout \& Mentor Agent\*\*. You can copy this into a file named `AI\_Learning\_Agent\_Plan.md`.
+This is the blueprint for your personal **AI Scout & Mentor Agent**. You can copy this into a file named `AI_Learning_Agent_Plan.md`.
 
+---
 
+# AI Learning Agent: Project "Scout & Mentor"
 
-\---
-
-
-
-\# AI Learning Agent: Project "Scout \& Mentor"
-
-
-
-\## 1. Objective
+## 1. Objective
 
 To build an automated agentic workflow that identifies high-value AI advancements, filters them for practical utility, and generates actionable "3-hour projects." The ultimate goal is to move from passive consumption of AI news to active, portfolio-building implementation.
 
+## 2. Approach
 
+The system follows a **"Signal-to-Action"** philosophy:
 
-\## 2. Approach
+*   **Automated Ingestion:** Remove the need to manually check sites.
 
-The system follows a \*\*"Signal-to-Action"\*\* philosophy:
+*   **Utility Filtering:** Use LLMs to discard marketing hype and focus on implementable technology.
 
-\*   \*\*Automated Ingestion:\*\* Remove the need to manually check sites.
+*   **Projectization:** Every significant news item is converted into a structured coding exercise.
 
-\*   \*\*Utility Filtering:\*\* Use LLMs to discard marketing hype and focus on implementable technology.
+*   **Public Proof:** Every completed exercise is committed to GitHub to build a visible track record of expertise.
 
-\*   \*\*Projectization:\*\* Every significant news item is converted into a structured coding exercise.
+## 3. Architecture / Pipeline
 
-\*   \*\*Public Proof:\*\* Every completed exercise is committed to GitHub to build a visible track record of expertise.
+1.  **Ingestion Layer:** n8n monitors RSS feeds (Blogs) and YouTube APIs (Channels).
 
+2.  **Processing Layer:** 
 
+    *   **Filter Node:** Checks keywords.
 
-\## 3. Architecture / Pipeline
+    *   **AI Agent Node:** Analyzes content and determines if a 3-hour project is feasible.
 
-1\.  \*\*Ingestion Layer:\*\* n8n monitors RSS feeds (Blogs) and YouTube APIs (Channels).
+3.  **Output Layer:** 
 
-2\.  \*\*Processing Layer:\*\* 
+    *   **GitHub API:** Creates a new Issue or Repository with the project plan.
 
-&#x20;   \*   \*\*Filter Node:\*\* Checks keywords.
+    *   **Notification:** Alerts the user (Slack/Email/Discord) that a new "Mission" is ready.
 
-&#x20;   \*   \*\*AI Agent Node:\*\* Analyzes content and determines if a 3-hour project is feasible.
+4.  **Learning Loop:** User completes the project -> Commits code -> Summarizes learning in the README.
 
-3\.  \*\*Output Layer:\*\* 
+## 4. Tech Stack
 
-&#x20;   \*   \*\*GitHub API:\*\* Creates a new Issue or Repository with the project plan.
+*   **Orchestration:** [n8n](https://n8n.io/) (Desktop or Self-hosted).
 
-&#x20;   \*   \*\*Notification:\*\* Alerts the user (Slack/Email/Discord) that a new "Mission" is ready.
+*   **Brain (LLM):** Claude 3.5 Sonnet (preferred for coding/logic) or GPT-4o.
 
-4\.  \*\*Learning Loop:\*\* User completes the project -> Commits code -> Summarizes learning in the README.
+*   **Data Sources:** 
 
+    *   **RSS:** OpenAI, Anthropic, Google AI, DeepLearning.AI, TLDR AI, Interconnects.
 
+    *   **YouTube API:** Karpathy, Dave Ebbelaar, Everyday AI.
 
-\## 4. Tech Stack
+*   **Project Tracking:** GitHub (Issues and Repositories).
 
-\*   \*\*Orchestration:\*\* \[n8n](https://n8n.io/) (Desktop or Self-hosted).
+*   **Environment:** Python (local venv or Jupyter Notebooks) for project execution.
 
-\*   \*\*Brain (LLM):\*\* Claude 3.5 Sonnet (preferred for coding/logic) or GPT-4o.
+## 5. Pre-requisites
 
-\*   \*\*Data Sources:\*\* 
+- [ ] **n8n Desktop:** Installed on your local machine.
 
-&#x20;   \*   \*\*RSS:\*\* OpenAI, Anthropic, Google AI, DeepLearning.AI, TLDR AI, Interconnects.
+- [ ] **Anthropic/OpenAI API Key:** Funded with a small amount (e.g., $5-$10) for LLM reasoning.
 
-&#x20;   \*   \*\*YouTube API:\*\* Karpathy, Dave Ebbelaar, Everyday AI.
+- [ ] **GitHub Personal Access Token (PAT):** With permissions for `repo` and `workflow`.
 
-\*   \*\*Project Tracking:\*\* GitHub (Issues and Repositories).
+- [ ] **Google Cloud Console Account:** (Optional but recommended) To get a YouTube Data API Key.
 
-\*   \*\*Environment:\*\* Python (local venv or Jupyter Notebooks) for project execution.
+- [ ] **Basic Python Knowledge:** Ability to create virtual environments and install packages via `pip`.
 
+## 6. Detailed Steps
 
+### Step 1: Initialize the n8n Workflow
 
-\## 5. Pre-requisites
+1.  Open n8n and create a new workflow titled "AI Scout & Mentor."
 
-\- \[ ] \*\*n8n Desktop:\*\* Installed on your local machine.
+2.  Add a **Schedule Trigger** set to run once every 24 hours (or manually for testing).
 
-\- \[ ] \*\*Anthropic/OpenAI API Key:\*\* Funded with a small amount (e.g., $5-$10) for LLM reasoning.
+### Step 2: Configure Data Sources
 
-\- \[ ] \*\*GitHub Personal Access Token (PAT):\*\* With permissions for `repo` and `workflow`.
+1.  **RSS Nodes:** Add one RSS node for each source. 
 
-\- \[ ] \*\*Google Cloud Console Account:\*\* (Optional but recommended) To get a YouTube Data API Key.
+    *   Example: `https://openai.com/news/rss.xml`
 
-\- \[ ] \*\*Basic Python Knowledge:\*\* Ability to create virtual environments and install packages via `pip`.
+2.  **YouTube Node:** Connect the YouTube node using your API key. Add the channel IDs for the specified creators.
 
+3.  **Merge Node:** Connect all source nodes into a "Merge" node to create a single stream of data.
 
+### Step 3: The AI Brain (Filtering & Planning)
 
-\## 6. Detailed Steps
-
-
-
-\### Step 1: Initialize the n8n Workflow
-
-1\.  Open n8n and create a new workflow titled "AI Scout \& Mentor."
-
-2\.  Add a \*\*Schedule Trigger\*\* set to run once every 24 hours (or manually for testing).
-
-
-
-\### Step 2: Configure Data Sources
-
-1\.  \*\*RSS Nodes:\*\* Add one RSS node for each source. 
-
-&#x20;   \*   Example: `https://openai.com/news/rss.xml`
-
-2\.  \*\*YouTube Node:\*\* Connect the YouTube node using your API key. Add the channel IDs for the specified creators.
-
-3\.  \*\*Merge Node:\*\* Connect all source nodes into a "Merge" node to create a single stream of data.
-
-
-
-\### Step 3: The AI Brain (Filtering \& Planning)
-
-Add an \*\*AI Agent Node\*\* (or Basic LLM Node) with the following System Prompt:
-
-
+Add an **AI Agent Node** (or Basic LLM Node) with the following System Prompt:
 
 > "You are an AI Master Instructor. I will provide you with titles and summaries from AI news and tutorials. 
-
 > 
-
-> \*\*Filter Criteria:\*\* Only proceed if the content describes a new model, library, tool, or technique that can be tested/implemented in Python within 3 hours. Reject news about funding, policy, or generic 'hype.'
-
+> **Filter Criteria:** Only proceed if the content describes a new model, library, tool, or technique that can be tested/implemented in Python within 3 hours. Reject news about funding, policy, or generic 'hype.'
 > 
-
-> \*\*Output Requirement:\*\* For accepted items, generate a JSON object:
-
+> **Output Requirement:** For accepted items, generate a JSON object:
 > 1. Project Title
-
 > 2. Tech Stack (Specific libraries/APIs)
-
 > 3. Action Plan (5 steps to build a Proof of Concept)
+> 4. GitHub repo name (A slugified version of the title)"
 
-> 4. GitHub Repo Name (A slugified version of the title)"
+### Step 4: GitHub Integration
 
+1.  Add a **GitHub Node** to the workflow.
 
+2.  Set the Action to `Create an Issue` or `Create a Repository`.
 
-\### Step 4: GitHub Integration
+3.  Map the AI-generated JSON fields to the GitHub Issue body.
 
-1\.  Add a \*\*GitHub Node\*\* to the workflow.
+4.  (Optional) Add a **Slack or Discord Node** to send yourself a message when a new project is created.
 
-2\.  Set the Action to `Create an Issue` or `Create a Repository`.
+### Step 5: The Execution Workflow (Manual)
 
-3\.  Map the AI-generated JSON fields to the GitHub Issue body.
+1.  Upon notification, open the GitHub Issue.
 
-4\.  (Optional) Add a \*\*Slack or Discord Node\*\* to send yourself a message when a new project is created.
+2.  Initialize a local folder: `mkdir project-name && cd project-name`.
 
+3.  Build the PoC using the AI-generated Action Plan.
 
+4.  **Finalize:** Create a `README.md` containing:
 
-\### Step 5: The Execution Workflow (Manual)
+    *   What the technology is.
 
-1\.  Upon notification, open the GitHub Issue.
+    *   The code results.
 
-2\.  Initialize a local folder: `mkdir project-name \&\& cd project-name`.
+    *   One "Key Insight" learned during the build.
 
-3\.  Build the PoC using the AI-generated Action Plan.
+5.  `git commit -m "Project complete"` and push.
 
-4\.  \*\*Finalize:\*\* Create a `README.md` containing:
-
-&#x20;   \*   What the technology is.
-
-&#x20;   \*   The code results.
-
-&#x20;   \*   One "Key Insight" learned during the build.
-
-5\.  `git commit -m "Project complete"` and push.
-
-
-
-\---
-
+---
