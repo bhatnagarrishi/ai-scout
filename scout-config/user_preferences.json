@@ -25,7 +25,7 @@
     {
       "item": "The project is a tool for concurrently downloading economic data.",
       "weight": 1,
-      "reason": "Unknown (Inferred reason from legacy sync)"
+      "reason": "Although interesting, its too low level and narrow use case. There is no specific tool that I would learn from this, except using AI to code"
     }
   ]
 }
