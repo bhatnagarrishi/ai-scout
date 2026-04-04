@@ -1,10 +1,10 @@
+```json
 {
-  "positive_preferences": [],
-  "negative_constraints": [
-    {
-      "core_reason": "Too simple or generic API wrapper",
-      "weight": 1,
-      "examples": ["OpenAI Wrapper Demo"]
-    }
-  ]
+  "Project lacks complexity or AI/ML integration": {
+    "weight": 1,
+    "examples": [
+      "Concurrent File Downloader"
+    ]
+  }
 }
+```
