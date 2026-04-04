@@ -22,14 +22,15 @@ const nodeHeight = 80;
  * - Top-to-bottom hierarchical layout
  * - Inverted hierarchy support for infrastructure (children above parents)
  * - Configurable spacing between nodes and ranks
+ * - Compound node support (nested nodes)
  * 
  * @param nodes - Array of React Flow nodes to layout
  * @param edges - Array of React Flow edges defining connections
  * @returns Object containing layouted nodes with calculated positions and original edges
  */
 export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
-    // Initialize Dagre graph instance
-    const dagreGraph = new dagre.graphlib.Graph();
+    // Initialize Dagre graph instance with compound support
+    const dagreGraph = new dagre.graphlib.Graph({ compound: true });
     dagreGraph.setDefaultEdgeLabel(() => ({}));
 
     // Configure layout algorithm
@@ -41,6 +42,11 @@ export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
     // Register all nodes with their dimensions
     nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+
+        // Register parent-child relationship for compound layout
+        if (node.parentNode) {
+            dagreGraph.setParent(node.id, node.parentNode);
+        }
     });
 
     /**
@@ -79,16 +85,46 @@ export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
     // Map calculated positions back to React Flow nodes
     const layoutedNodes = nodes.map((node) => {
         const nodeWithPosition = dagreGraph.node(node.id);
+
+        // Dagre gives global coordinates (center x, center y) for all nodes.
+        // React Flow expects:
+        // - Top-level nodes: Global coordinates (top-left x, top-left y)
+        // - Child nodes: Relative coordinates to parent (top-left x, top-left y)
+
+        let position = {
+            x: nodeWithPosition.x - nodeWidth / 2,
+            y: nodeWithPosition.y - nodeHeight / 2,
+        };
+
+        // If node has a parent, convert global Dagre coordinates to relative React Flow coordinates
+        if (node.parentNode) {
+            const parentNode = dagreGraph.node(node.parentNode);
+            if (parentNode) {
+                // Calculate parent's top-left corner in global space
+                const parentX = parentNode.x - parentNode.width / 2;
+                const parentY = parentNode.y - parentNode.height / 2;
+
+                // Relative position = Child Global - Parent Global
+                position = {
+                    x: position.x - parentX,
+                    y: position.y - parentY
+                };
+            }
+        }
+
         return {
             ...node,
             // Default connection positions (custom nodes can override with specific handles)
             targetPosition: Position.Top,
             sourcePosition: Position.Bottom,
-            position: {
-                // Dagre returns center coordinates, adjust for top-left positioning
-                x: nodeWithPosition.x - nodeWidth / 2,
-                y: nodeWithPosition.y - nodeHeight / 2,
-            },
+            position: position,
+            // Update dimensions if Dagre calculated new ones (e.g. for parents)
+            style: {
+                ...node.style,
+                // Use Dagre's calculated dimensions if available, otherwise keep original
+                width: nodeWithPosition.width || node.style?.width,
+                height: nodeWithPosition.height || node.style?.height
+            }
         };
     });
 
