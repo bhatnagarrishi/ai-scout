@@ -3,7 +3,7 @@
   "n8n_version": "latest",
   "environment": {
     "N8N_BASIC_AUTH_ACTIVE": "false",
-    "WEBHOOK_URL": "http://localhost:5678",
+    "WEBHOOK_URL": "Loaded dynamically from .env",
     "GENERIC_TIMEZONE": "America/New_York"
   },
   "workflow_files": [
