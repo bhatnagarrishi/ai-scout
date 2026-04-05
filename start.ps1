@@ -29,4 +29,8 @@ Write-Host "Booting up n8n engine..." -ForegroundColor Green
 if (-not $env:WEBHOOK_URL) {
     $env:WEBHOOK_URL = "https://$domain"
 }
+
+# Explicitly enable all nodes (overriding any defaults)
+$env:NODES_EXCLUDE = "[]"
+
 npx n8n

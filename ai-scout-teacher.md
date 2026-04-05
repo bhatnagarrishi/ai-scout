@@ -119,6 +119,10 @@ Add an **AI Agent Node** (or Basic LLM Node) with the following System Prompt:
 >   "action_plan": "5 exact, actionable steps to build the Proof of Concept",
 >   "github_repo_name": "slugified-title"
 > }"
+```
+
+> [!TIP]
+> **Advanced Reliability (Pydantic AI)**: For mission-critical filtering, replace the standard AI Agent node with an **Execute Command** node calling a Python script powered by [Pydantic AI](./pocs/typesafe-llm-pydantic-ai). This guarantees the output strictly adheres to your `BaseModel` schema, preventing n8n JSON parsing errors.
 
 ### Step 5: Deduplication & Guardrails (Upsert Pattern)
 
