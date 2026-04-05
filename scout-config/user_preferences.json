@@ -14,6 +14,11 @@
       "item": "The project involves integrating interactive tools, likely related to MCP (Microsoft Certified Professional) technologies.",
       "weight": 1,
       "reason": "Interested in MCP projects"
+    },
+    {
+      "item": "This project implements a Python-based middleware for AI content moderation using gpt-oss-safeguard to ensure age-appropriate interactions for teens.",
+      "reason": "The user finds this a good use of technology for a good social cause and is very interested in such items.",
+      "weight": 1
     }
   ],
   "negative_constraints": [
