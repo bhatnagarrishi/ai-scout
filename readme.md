@@ -89,5 +89,6 @@ To replicate the AI Scout logic in your own n8n instance:
 
 | 1 | [mcp-interactive-tool](./pocs/mcp-interactive-tool) | Interactive MCP Tool Integration (Issue #51) | Completed (Protocol Verified) |
 | 2 | [typesafe-llm-pydantic-ai](./pocs/typesafe-llm-pydantic-ai) | Type-Safe Structured output with **Pydantic AI** ([Learnings](./pocs/typesafe-llm-pydantic-ai/LEARNINGS.md)) | Completed |
+| 3 | [gpt-oss-safeguard-teen-safety](./pocs/gpt-oss-safeguard-teen-safety) | Teen Safety Middleware with **gpt-oss-safeguard-20b** — Groq & Ollama ([Learnings](./pocs/gpt-oss-safeguard-teen-safety/LEARNINGS.md)) | Completed |
 
 > Update this table as POCs are added.
