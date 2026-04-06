@@ -2,31 +2,37 @@
   {
     "name": "RealPython",
     "url": "https://realpython.com/atom.xml?format=xml",
+    "type": "rss",
     "active": false
   },
   {
     "name": "OpenAI News",
     "url": "https://openai.com/news/rss.xml",
+    "type": "rss",
     "active": true
   },
   {
     "name": "Stability AI",
     "url": "https://stability.ai/news?format=rss",
+    "type": "rss",
     "active": true
   },
   {
     "name": "Anthropic",
     "url": "https://www.anthropic.com/feed.xml",
+    "type": "rss",
     "active": true
   },
   {
     "name": "Google AI Blog",
     "url": "https://blog.google/technology/ai/rss/",
+    "type": "rss",
     "active": true
   },
   {
     "name": "Andrej Karpathy (YouTube)",
     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXUPKJO5MZQN11PqgIvyuvQ",
+    "type": "youtube",
     "active": true
   }
 ]
