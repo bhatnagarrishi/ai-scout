@@ -19,6 +19,11 @@
       "item": "This project implements a Python-based middleware for AI content moderation using gpt-oss-safeguard to ensure age-appropriate interactions for teens.",
       "reason": "The user finds this a good use of technology for a good social cause and is very interested in such items.",
       "weight": 1
+    },
+    {
+      "item": "This project involves implementing a modular agentic loop using Python, OpenAI API, and Pydantic to orchestrate AI model calls, tool execution, and response parsing for autonomous task completion.",
+      "reason": "The project taught a very conceptual lesson, indicating the user appreciates projects that provide deep conceptual understanding.",
+      "weight": 1
     }
   ],
   "negative_constraints": [
