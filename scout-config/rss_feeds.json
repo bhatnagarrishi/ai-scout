@@ -23,5 +23,10 @@
     "name": "Google AI Blog",
     "url": "https://blog.google/technology/ai/rss/",
     "active": true
+  },
+  {
+    "name": "Andrej Karpathy (YouTube)",
+    "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg",
+    "active": true
   }
 ]
