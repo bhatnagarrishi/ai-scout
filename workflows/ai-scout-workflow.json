@@ -9,8 +9,8 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        464,
-        -256
+        -32,
+        224
       ],
       "id": "f6dafdeb-eee3-4b83-b49e-bcde50413e76",
       "name": "RSS Read",
@@ -30,8 +30,8 @@
           "cachedResultName": "ai-scout",
           "cachedResultUrl": "https://github.com/bhatnagarrishi/ai-scout"
         },
-        "title": "={{ JSON.parse($('Use LLM to decide quality').item.json.text).project_title }}",
-        "body": "=### 🎯 Objective\n{{ JSON.parse($('Use LLM to decide quality').item.json.text).objective }}\n\n---\n**🏭 Source:** {{ JSON.parse($('Use LLM to decide quality').item.json.text).source }}\n**🧩 Area:** {{ JSON.parse($('Use LLM to decide quality').item.json.text).area }}\n**⚙️ Tech Stack:** {{ JSON.parse($('Use LLM to decide quality').item.json.text).tech_stack }}\n**🔑 Prerequisites:** {{ JSON.parse($('Use LLM to decide quality').item.json.text).prerequisites }}\n**🔥 Difficulty:** {{ JSON.parse($('Use LLM to decide quality').item.json.text).difficulty }} | **⏱️ Time:** {{ JSON.parse($('Use LLM to decide quality').item.json.text).estimated_time }}\n\n---\n### 🛠️ Action Plan\n{{ Array.isArray(JSON.parse($('Use LLM to decide quality').item.json.text).action_plan) ? JSON.parse($('Use LLM to decide quality').item.json.text).action_plan.join('\\n\\n') : JSON.parse($('Use LLM to decide quality').item.json.text).action_plan }}\n\n<!-- source_url: {{ $('RSS Read').item.json.link || $('RSS Read').item.json.id }} -->\n",
+        "title": "={{ JSON.parse($json.stdout).project_title }}",
+        "body": "==### 🎯 Objective\n{{ JSON.parse($json.stdout).objective }}\n\n---\n**🏭 Source:** {{ JSON.parse($json.stdout).source }}\n**🧩 Area:** {{ JSON.parse($json.stdout).area }}\n**⚙️ Tech Stack:** {{ JSON.parse($json.stdout).tech_stack }}\n**🔑 Prerequisites:** {{ JSON.parse($json.stdout).prerequisites }}\n**🔥 Difficulty:** {{ JSON.parse($json.stdout).difficulty }} | **⏱️ Time:** {{ JSON.parse($json.stdout).estimated_time }}\n\n---\n### 🛠️ Action Plan\n{{ Array.isArray(JSON.parse($json.stdout).action_plan) ? JSON.parse($json.stdout).action_plan.join('\\n\\n') : JSON.parse($json.stdout).action_plan }}\n\n<!-- source_url: {{ $('Merge').item.json.link || $('RSS Read').item.json.id }} -->\n",
         "labels": [],
         "assignees": []
       },
@@ -64,8 +64,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -432,
-        -256
+        -576,
+        -288
       ],
       "id": "4ba059b8-0ba7-4ead-85b3-10e3eee096cd",
       "name": "4am daily trigger"
@@ -77,8 +77,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        -256
+        96,
+        -288
       ],
       "id": "9a13c4da-6271-4d3e-9149-d8ebbe537f53",
       "name": "Extract RSS Feed URLs"
@@ -106,8 +106,8 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        16,
-        -256
+        -128,
+        -288
       ],
       "id": "691f4cb9-f8dd-4717-895b-a414556f16e2",
       "name": "Get RSS Feed list",
@@ -142,8 +142,8 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        -208,
-        -256
+        -352,
+        -288
       ],
       "id": "df465879-a775-4f77-a380-4bf7e85fd928",
       "name": "Get Ingested Urls",
@@ -190,7 +190,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// 1. Fetch historical memory from the very first node\nconst historicalBase64 = $('Get Ingested Urls').first().json.content;\nconst rawHistory = JSON.parse(Buffer.from(historicalBase64, 'base64').toString('utf8'));\n\n// 2. Fetch EVERY URL that was read by the RSS node this session\n// We use .all() to grab the entire batch of 925+ items at once!\nconst sessionItems = $('RSS Read').all();\nconst sessionUrls = sessionItems.map(item => item.json.link || item.json.guid);\n\n// 3. Merge, De-duplicate, and REMOVE NULLS\n// This filters out any empty strings or nulls automatically\nconst combined = [...new Set([...rawHistory, ...sessionUrls])].filter(url => url && typeof url === 'string');\n\nreturn {\n  json: {\n    file_content: JSON.stringify(combined, null, 2)\n  }\n};\n"
+        "jsCode": "// 1. Fetch historical memory from the very first node\nconst historicalBase64 = $('Get Ingested Urls').first().json.content;\nconst rawHistory = JSON.parse(Buffer.from(historicalBase64, 'base64').toString('utf8'));\n\n// 2. Fetch EVERY URL that was read by the RSS node this session\n// We use .all() to grab the entire batch of 925+ items at once!\nconst rssItems = $('RSS Read').all();\nconst ytItems = $('Get extra fields for YouTube videos').all();\nconst sessionItems = [...rssItems, ...ytItems];\nconst sessionUrls = sessionItems.map(item => item.json.link || item.json.guid);\n\n// 3. Merge, De-duplicate, and REMOVE NULLS\n// This filters out any empty strings or nulls automatically\nconst combined = [...new Set([...rawHistory, ...sessionUrls])].filter(url => url && typeof url === 'string');\n\nreturn {\n  json: {\n    file_content: JSON.stringify(combined, null, 2)\n  }\n};\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -239,60 +239,6 @@
     },
     {
       "parameters": {
-        "batchSize": 5,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        1360,
-        -160
-      ],
-      "id": "59389816-798c-4961-bbcf-8435d2397998",
-      "name": "Loop Over Items"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        1808,
-        -64
-      ],
-      "id": "f01572b1-a925-4d8d-a852-c376469fed1c",
-      "name": "Wait",
-      "webhookId": "9dfc01a3-a959-46dc-8b27-3eb53653f6b8"
-    },
-    {
-      "parameters": {
-        "executeOnce": false,
-        "command": "=python scout_agent.py --title \"{{ $json.title.replace('\"', '\\\"') }}\" --snippet \"{{ $json.contentSnippet.replace('\"', '\\\"') }}\""
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        912,
-        -256
-      ],
-      "id": "16bacc73-124f-482a-a1ce-837b7e154ae5",
-      "name": "Execute Command"
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $(\"RSS Read\").all();\nconst ingestedContent = $(\"Get Ingested Urls\").all()[0].json.content;\nconst ingestedUrls = JSON.parse(Buffer.from(ingestedContent, 'base64').toString('utf8')).map(u => u.trim());\n\nreturn items.filter(item => {\n  const url = (item.json.link || item.json.guid || \"\").trim();\n  return url && !ingestedUrls.includes(url);\n});"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        688,
-        -256
-      ],
-      "id": "bd358872-faed-4427-b367-d95d45677ca6",
-      "name": "Code in JavaScript",
-      "alwaysOutputData": false
-    },
-    {
-      "parameters": {
         "aggregate": "aggregateAllItemData",
         "options": {}
       },
@@ -304,6 +250,159 @@
       ],
       "id": "9216346a-23d3-4c16-9c61-fe1c78374950",
       "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst ingestedContent = $(\"Get Ingested Urls\").all()[0].json.content;\nconst ingestedUrls = JSON.parse(Buffer.from(ingestedContent, 'base64').toString('utf8')).map(u => u.trim());\n\nreturn items.filter(item => {\n  const url = (item.json.link || item.json.guid || \"\").trim();\n  return url && !ingestedUrls.includes(url);\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        -240
+      ],
+      "id": "bd358872-faed-4427-b367-d95d45677ca6",
+      "name": "Dedupe filter",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "64b04f64-0b5c-433d-b563-e1780a968e1e",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "=youtube",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -320,
+        16
+      ],
+      "id": "2892276a-eb10-4c2b-aadf-7a4d22c00c9b",
+      "name": "YouTube vs RSS"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -48,
+        -64
+      ],
+      "id": "37f07b99-782b-4289-9a85-3a20d368d331",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse YouTube RSS XML manually to extract media:description\nconst xml = $input.first().json.data; // raw XML string\n\n// Helper: extract all occurrences of a tag\nconst extractAll = (tag, content) => {\n  const results = [];\n  const regex = new RegExp(`<${tag}[^>]*>([\\\\s\\\\S]*?)<\\\\/${tag}>`, 'g');\n  let m;\n  while ((m = regex.exec(content)) !== null) results.push(m[1].trim());\n  return results;\n};\n\nconst extractAttr = (tag, attr, content) => {\n  const regex = new RegExp(`<${tag}[^>]+${attr}=\"([^\"]*)\"`, 'g');\n  const results = [];\n  let m;\n  while ((m = regex.exec(content)) !== null) results.push(m[1]);\n  return results;\n};\n\n// Split into <entry> blocks\nconst entries = xml.split('<entry>').slice(1);\n\nreturn entries.map(entry => {\n  const get = (tag) => extractAll(tag, entry)[0] || '';\n  \n  return {\n    json: {\n      title:          get('title').replace(/<!\\[CDATA\\[|\\]\\]>/g, ''),\n      link:           (/<link rel=\"alternate\" href=\"([^\"]+)\"/.exec(entry) || [])[1] || '',\n      pubDate:        get('published'),\n      author:         get('name'),\n      id:             get('yt:videoId'),\n      contentSnippet: get('media:description').replace(/<!\\[CDATA\\[|\\]\\]>/g, '').substring(0, 1000),\n      views:          (/<media:statistics views=\"(\\d+)\"/.exec(entry) || [])[1] || '0',\n      thumbnail:      (/<media:thumbnail url=\"([^\"]+)\"/.exec(entry) || [])[1] || '',\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -48
+      ],
+      "id": "a88dcf3f-efe1-42c5-b241-d76718bb45e0",
+      "name": "Get extra fields for YouTube videos"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        368,
+        144
+      ],
+      "id": "d6621133-6f64-42fb-a4c6-2d682c3e49b4",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "batchSize": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        864,
+        -368
+      ],
+      "id": "fd855930-fa9a-405f-af50-57a5ae92c715",
+      "name": "Send LLM requests in batches"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=python scout_agent.py --title \"{{ $json.title.replace('\"', '\\\"') }}\" --snippet \"{{ $json.contentSnippet.replace('\"', '\\\"') }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -128
+      ],
+      "id": "16bacc73-124f-482a-a1ce-837b7e154ae5",
+      "name": "Send LLM request"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "64c106c8-7e11-4e64-97af-7e0da9e7fc5a",
+      "name": "Pause1",
+      "webhookId": "6cdf3c81-0953-45b4-8638-da3c19093495"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1808,
+        -64
+      ],
+      "id": "f01572b1-a925-4d8d-a852-c376469fed1c",
+      "name": "Pause2",
+      "webhookId": "9dfc01a3-a959-46dc-8b27-3eb53653f6b8"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1360,
+        -160
+      ],
+      "id": "59389816-798c-4961-bbcf-8435d2397998",
+      "name": "Throttle GitHub API calls"
     }
   ],
   "pinData": {},
@@ -312,7 +411,7 @@
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -334,7 +433,7 @@
       "main": [
         [
           {
-            "node": "RSS Read",
+            "node": "YouTube vs RSS",
             "type": "main",
             "index": 0
           }
@@ -367,7 +466,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Throttle GitHub API calls",
             "type": "main",
             "index": 0
           }
@@ -385,7 +484,7 @@
       "main": [
         [
           {
-            "node": "Wait",
+            "node": "Pause2",
             "type": "main",
             "index": 0
           }
@@ -403,7 +502,131 @@
         ]
       ]
     },
-    "Loop Over Items": {
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Update Ingested URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe filter": {
+      "main": [
+        [
+          {
+            "node": "Send LLM requests in batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube vs RSS": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Get extra fields for YouTube videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get extra fields for YouTube videos": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Dedupe filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send LLM requests in batches": {
+      "main": [
+        [
+          {
+            "node": "Filter relevant issues",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send LLM request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send LLM request": {
+      "main": [
+        [
+          {
+            "node": "Pause1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause1": {
+      "main": [
+        [
+          {
+            "node": "Send LLM requests in batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause2": {
+      "main": [
+        [
+          {
+            "node": "Throttle GitHub API calls",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Throttle GitHub API calls": {
       "main": [
         [
           {
@@ -420,50 +643,6 @@
           }
         ]
       ]
-    },
-    "Wait": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute Command": {
-      "main": [
-        [
-          {
-            "node": "Filter relevant issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code in JavaScript": {
-      "main": [
-        [
-          {
-            "node": "Execute Command",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Aggregate": {
-      "main": [
-        [
-          {
-            "node": "Update Ingested URLs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "active": true,
@@ -472,7 +651,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "465b1f1c-015c-4d98-9c5e-68677a6a8400",
+  "versionId": "d8a4d046-6e6b-4ee9-8bbc-df334e619041",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5a12ff2ec3c83de85fbf0f876515566da46b19733d02a0620f8f6adc00f08a88"
