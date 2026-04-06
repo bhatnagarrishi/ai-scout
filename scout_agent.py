@@ -3,6 +3,7 @@ import sys
 import asyncio
 import argparse
 import json
+import logging
 from enum import Enum
 from typing import List, Optional
 from dotenv import load_dotenv
@@ -10,13 +11,17 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.models.google import GoogleModel
 
+# Suppress the noisy "Both GOOGLE_API_KEY and GEMINI_API_KEY are set" warning
+# that Pydantic AI's Google provider prints to stderr unconditionally.
+logging.getLogger("pydantic_ai").setLevel(logging.ERROR)
+os.environ.setdefault("PYDANTIC_AI_LOG_LEVEL", "ERROR")
+
 # 1. Setup Environment
-# Load the .env file from the root directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 env_path = os.path.join(current_dir, '.env')
 load_dotenv(env_path)
 
-# Map GEMINI_API_KEY to GOOGLE_API_KEY for Pydantic AI's Google provider
+# Map GEMINI_API_KEY → GOOGLE_API_KEY (Pydantic AI's Google provider uses this name)
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
     os.environ["GOOGLE_API_KEY"] = api_key
@@ -67,16 +72,19 @@ async def run_scout(title: str, snippet: str) -> str:
     input_text = f"Title: {title}\nContent: {snippet}"
     try:
         result = await agent.run(input_text)
-        # Using .output which we confirmed stores the validated Pydantic object
-        return result.output.model_dump_json(indent=2)
+        # .output holds the validated Pydantic object
+        data = result.output.model_dump()
+        # Always include the original title so n8n can display it on rejection
+        data["input_title"] = title
+        return json.dumps(data, indent=2, ensure_ascii=False)
     except Exception as e:
-        # Graceful error handling for the pipeline
         error_result = {
             "status": "Rejected",
-            "reasoning": f"Critical error during classification: {str(e)}",
+            "reasoning": f"Classification error: {str(e)}",
+            "input_title": title,
             "project_title": title,
             "objective": "N/A",
-            "source": "System",
+            "source": "N/A",
             "area": "N/A",
             "tech_stack": "N/A",
             "prerequisites": "N/A",
@@ -102,8 +110,13 @@ def main():
         print("Test cycle complete.")
         return
 
-    # Execute and print purely JSON for n8n consumption
-    output = asyncio.run(run_scout(args.title, args.snippet))
+    # Print ONLY clean JSON to stdout — n8n reads this
+    # Redirect stderr to devnull to silence any remaining library warnings
+    with open(os.devnull, 'w') as devnull:
+        old_stderr = sys.stderr
+        sys.stderr = devnull
+        output = asyncio.run(run_scout(args.title, args.snippet))
+        sys.stderr = old_stderr
     print(output)
 
 if __name__ == "__main__":

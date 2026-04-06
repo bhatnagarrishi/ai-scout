@@ -9,35 +9,12 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        912,
-        -320
+        464,
+        -256
       ],
       "id": "f6dafdeb-eee3-4b83-b49e-bcde50413e76",
       "name": "RSS Read",
       "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "modelName": "models/gemini-3.1-flash-lite-preview",
-        "options": {
-          "maxOutputTokens": 4096,
-          "temperature": 0.2
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        48,
-        144
-      ],
-      "id": "51209b58-2384-4484-b6ee-8e4a67b512be",
-      "name": "Google Gemini Chat Model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "rFJhrkoIRxubcbz7",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
     },
     {
       "parameters": {
@@ -61,8 +38,8 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        800,
-        144
+        1584,
+        -160
       ],
       "id": "e6964cd9-fd26-4fbc-b6bc-365a7d1d81a1",
       "name": "Create an issue",
@@ -70,7 +47,7 @@
       "credentials": {
         "githubApi": {
           "id": "jRovgKIx19abru0d",
-          "name": "Cortex-Private"
+          "name": "ai-scout"
         }
       }
     },
@@ -87,8 +64,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -32,
-        -320
+        -432,
+        -256
       ],
       "id": "4ba059b8-0ba7-4ead-85b3-10e3eee096cd",
       "name": "4am daily trigger"
@@ -100,8 +77,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        672,
-        -320
+        240,
+        -256
       ],
       "id": "9a13c4da-6271-4d3e-9149-d8ebbe537f53",
       "name": "Extract RSS Feed URLs"
@@ -129,8 +106,8 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        448,
-        -320
+        16,
+        -256
       ],
       "id": "691f4cb9-f8dd-4717-895b-a414556f16e2",
       "name": "Get RSS Feed list",
@@ -165,8 +142,8 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        192,
-        -320
+        -208,
+        -256
       ],
       "id": "df465879-a775-4f77-a380-4bf7e85fd928",
       "name": "Get Ingested Urls",
@@ -189,75 +166,8 @@
           },
           "conditions": [
             {
-              "id": "70bfcdf3-568c-40c4-9100-c4ce311fe599",
-              "leftValue": "={{ JSON.parse(Buffer.from($('Get Ingested Urls').first().json.content, 'base64').toString('utf8')).includes($('RSS Read').item.json.link) }}",
-              "rightValue": "",
-              "operator": {
-                "type": "boolean",
-                "operation": "true",
-                "singleValue": true
-              }
-            },
-            {
-              "id": "2298f812-5a94-434d-ba65-008c3f5830e3",
-              "leftValue": "={{ $json.link }}",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "notEmpty",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1152,
-        -320
-      ],
-      "id": "08778bdc-1909-4cc8-a566-12a0fabc9023",
-      "name": "Filter only new feeds"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.title }}{{ $json.contentSnippet }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "\"You are an AI Master Instructor. I will provide you with titles and summaries from AI news and tutorials.  Filter Criteria: Evaluate if the content describes a new model, library, tool, or technique that can be tested/implemented in Python within 3 hours. Reject news about funding, policy, or generic 'hype.'  > **Output Requirement:** ALWAYS output a strictly valid JSON object exactly matching this format: > { >   \"status\": \"Accepted or Rejected\", >   \"reasoning\": \"1 sentence explaining why\", >   \"project_title\": \"Title of the project\", >   \"objective\": \"1-2 sentences explaining exactly what is being built and why it matters\", >   \"source\": \"e.g., OpenAI, Anthropic, HuggingFace, etc.\", >   \"area\": \"e.g., Image Generation, Agentic AI, RAG, Core Coding\", >   \"tech_stack\": \"e.g., Python, FastAPI, LangChain\", >   \"prerequisites\": \"e.g., OpenAI API Key, Local GPU\", >   \"difficulty\": \"Beginner, Intermediate, or Advanced\", >   \"estimated_time\": \"e.g., 2 hours\", >   \"action_plan\": \"5 exact, actionable steps to build the Proof of Concept\", >   \"github_repo_name\": \"slugified-title\" > }"
-            }
-          ]
-        },
-        "batching": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        16,
-        -80
-      ],
-      "id": "a5e58715-bd5d-440c-810d-be71e7825ae0",
-      "name": "Use LLM to decide quality",
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
               "id": "8c21733e-f2f6-41e9-a50d-2b3f4b58dacc",
-              "leftValue": "={{ $json.text ? JSON.parse($json.text).status : 'Error' }}",
+              "leftValue": "={{ $json.stdout ? JSON.parse($json.stdout).status : 'Error' }}",
               "rightValue": "Accepted",
               "operator": {
                 "type": "string",
@@ -272,8 +182,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        288,
-        112
+        1136,
+        -256
       ],
       "id": "cd33a68f-6b78-4cef-8ecb-8c34b81b9888",
       "name": "Filter relevant issues"
@@ -285,8 +195,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        -48
+        1808,
+        -352
       ],
       "id": "7fbc9bfa-c828-4bfc-aa20-b5a45ec29d9d",
       "name": "Update Ingested URLs"
@@ -314,8 +224,8 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        1280,
-        -48
+        2032,
+        -352
       ],
       "id": "746255f2-ea82-46a7-826b-2f5a92b4e182",
       "name": "Check in Ingested URLs in Git",
@@ -335,8 +245,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        608,
-        -32
+        1360,
+        -160
       ],
       "id": "59389816-798c-4961-bbcf-8435d2397998",
       "name": "Loop Over Items"
@@ -346,54 +256,64 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1008,
-        144
+        1808,
+        -64
       ],
       "id": "f01572b1-a925-4d8d-a852-c376469fed1c",
       "name": "Wait",
       "webhookId": "9dfc01a3-a959-46dc-8b27-3eb53653f6b8"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=python scout_agent.py --title \"{{ $json.title.replace('\"', '\\\"') }}\" --snippet \"{{ $json.contentSnippet.replace('\"', '\\\"') }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        912,
+        -256
+      ],
+      "id": "16bacc73-124f-482a-a1ce-837b7e154ae5",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $(\"RSS Read\").all();\nconst ingestedContent = $(\"Get Ingested Urls\").all()[0].json.content;\nconst ingestedUrls = JSON.parse(Buffer.from(ingestedContent, 'base64').toString('utf8')).map(u => u.trim());\n\nreturn items.filter(item => {\n  const url = (item.json.link || item.json.guid || \"\").trim();\n  return url && !ingestedUrls.includes(url);\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -256
+      ],
+      "id": "bd358872-faed-4427-b367-d95d45677ca6",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        -352
+      ],
+      "id": "9216346a-23d3-4c16-9c61-fe1c78374950",
+      "name": "Aggregate"
     }
   ],
-  "pinData": {
-    "4am daily trigger": [
-      {
-        "json": {
-          "timestamp": "2026-04-04T02:19:15.738-04:00",
-          "Readable date": "April 4th 2026, 2:19:15 am",
-          "Readable time": "2:19:15 am",
-          "Day of week": "Saturday",
-          "Year": "2026",
-          "Month": "April",
-          "Day of month": "04",
-          "Hour": "02",
-          "Minute": "19",
-          "Second": "15",
-          "Timezone": "America/New_York (UTC-04:00)"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ]
-  },
+  "pinData": {},
   "connections": {
     "RSS Read": {
       "main": [
         [
           {
-            "node": "Filter only new feeds",
+            "node": "Code in JavaScript",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Use LLM to decide quality",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -443,34 +363,18 @@
         ]
       ]
     },
-    "Filter only new feeds": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Use LLM to decide quality",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Use LLM to decide quality": {
-      "main": [
-        [
-          {
-            "node": "Filter relevant issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Filter relevant issues": {
       "main": [
         [
           {
             "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aggregate",
             "type": "main",
             "index": 0
           }
@@ -503,7 +407,7 @@
       "main": [
         [
           {
-            "node": "Update Ingested URLs",
+            "node": "Aggregate",
             "type": "main",
             "index": 0
           }
@@ -527,6 +431,39 @@
           }
         ]
       ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Filter relevant issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Update Ingested URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -535,7 +472,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "11eb3556-7264-48da-ad99-c0d611918c96",
+  "versionId": "465b1f1c-015c-4d98-9c5e-68677a6a8400",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5a12ff2ec3c83de85fbf0f876515566da46b19733d02a0620f8f6adc00f08a88"
