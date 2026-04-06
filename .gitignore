@@ -32,3 +32,4 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+scout_activity.log
