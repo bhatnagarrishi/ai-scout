@@ -4,29 +4,91 @@ import asyncio
 import argparse
 import json
 import logging
+import yaml
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
-from pydantic_ai import Agent
-from pydantic_ai.models.google import GoogleModel
 
-# Suppress the noisy "Both GOOGLE_API_KEY and GEMINI_API_KEY are set" warning
-# that Pydantic AI's Google provider prints to stderr unconditionally.
-logging.getLogger("pydantic_ai").setLevel(logging.ERROR)
-os.environ.setdefault("PYDANTIC_AI_LOG_LEVEL", "ERROR")
-
-# 1. Setup Environment
+# 1. Setup Environment & Suppress Warnings IMMEDIATELY
 current_dir = os.path.dirname(os.path.abspath(__file__))
 env_path = os.path.join(current_dir, '.env')
 load_dotenv(env_path)
 
-# Map GEMINI_API_KEY → GOOGLE_API_KEY (Pydantic AI's Google provider uses this name)
+# Map GEMINI_API_KEY → GOOGLE_API_KEY
+# Then UNSET GEMINI_API_KEY so the library doesn't see both and complain
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
     os.environ["GOOGLE_API_KEY"] = api_key
+    # This is the secret sauce: delete the extra key so the warning never triggers
+    if "GEMINI_API_KEY" in os.environ:
+        del os.environ["GEMINI_API_KEY"]
 
-# Set the established stable model for this account's experimental access
+# Suppress the noisy "Both GOOGLE_API_KEY and GEMINI_API_KEY are set" warning
+# and other library-level chatter
+logging.getLogger("pydantic_ai").setLevel(logging.ERROR)
+os.environ["PYDANTIC_AI_LOG_LEVEL"] = "ERROR"
+
+def load_config():
+    """Loads the agent configuration from YAML."""
+    config_path = os.path.join(current_dir, 'scout-config', 'scout_agent_config.yaml')
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        print(f"Error loading YAML config: {e}", file=sys.stderr)
+        return {"agent": {"system_prompt": "You are an AI Scout. {user_context}"}}
+
+def load_user_preferences():
+    """Loads and formats user-specific preferences from user_preferences.json."""
+    pref_path = os.path.join(current_dir, 'scout-config', 'user_preferences.json')
+    if not os.path.exists(pref_path):
+        return "No specific user preferences provided."
+    
+    try:
+        with open(pref_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        lines = []
+        if positive := data.get("positive_preferences"):
+            lines.append("POSITIVE PREFERENCES (Prioritize these):")
+            for p in positive:
+                lines.append(f"- {p['item']} (Reason: {p.get('reason', 'N/A')})")
+        
+        if negative := data.get("negative_constraints"):
+            lines.append("\nNEGATIVE CONSTRAINTS (Reject these immediately):")
+            for n in negative:
+                lines.append(f"- {n['item']} (Reason: {n.get('reason', 'N/A')})")
+        
+        return "\n".join(lines) if lines else "No preferences specified."
+    except Exception as e:
+        return f"Error loading preferences: {str(e)}"
+
+# 1. Load Configurations
+config = load_config()
+user_pref_text = load_user_preferences()
+
+# 2. Inject User Context into the System Prompt
+final_system_prompt = config['agent']['system_prompt'].replace("{user_context}", user_pref_text)
+
+def append_activity_log(title: str, status: str, reasoning: str):
+    """Appends a single line to a local log file for real-time tracking."""
+    log_path = os.path.join(current_dir, 'scout_activity.log')
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    # Clean title to prevent log-splitting
+    clean_title = title.replace('\n', ' ').replace('\r', '')[:80]
+    log_entry = f"[{timestamp}] {status.upper().ljust(8)} | {clean_title.ljust(80)} | {reasoning}\n"
+    try:
+        with open(log_path, 'a', encoding='utf-8') as f:
+            f.write(log_entry)
+    except Exception:
+        pass # Never fail the agent due to logging issues
+
+from pydantic import BaseModel, Field
+from pydantic_ai import Agent
+from pydantic_ai.models.google import GoogleModel
+
+# Set the established stable model
 model_name = 'gemini-2.5-flash'
 model = GoogleModel(model_name)
 
@@ -59,12 +121,7 @@ class ScoutReport(BaseModel):
 agent = Agent(
     model=model,
     output_type=ScoutReport,
-    system_prompt=(
-        "You are an AI Master Instructor and Elite Scout. "
-        "Filter Criteria: Evaluate if the content describes a new model, library, tool, or technique "
-        "that can be tested/implemented in Python within 3 hours. "
-        "REJECT news about funding, policy, AI hype, or general corporate announcements."
-    )
+    system_prompt=final_system_prompt
 )
 
 async def run_scout(title: str, snippet: str) -> str:
@@ -76,11 +133,19 @@ async def run_scout(title: str, snippet: str) -> str:
         data = result.output.model_dump()
         # Always include the original title so n8n can display it on rejection
         data["input_title"] = title
+        
+        # Log the activity
+        append_activity_log(title, data["status"], data["reasoning"])
+        
         return json.dumps(data, indent=2, ensure_ascii=False)
     except Exception as e:
+        reasoning = f"Classification error: {str(e)}"
+        # Log the error status
+        append_activity_log(title, "ERROR", reasoning)
+        
         error_result = {
             "status": "Rejected",
-            "reasoning": f"Classification error: {str(e)}",
+            "reasoning": reasoning,
             "input_title": title,
             "project_title": title,
             "objective": "N/A",
