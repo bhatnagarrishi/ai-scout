@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.models.google import GoogleModel
 
-import sys
+import yaml
 from pydantic_ai.models.test import TestModel
 
 # 1. API Key Mapping
@@ -20,6 +20,15 @@ if os.path.exists(env_path):
 else:
     print(f"--- WARNING: .env file NOT FOUND at {env_path} ---")
 
+# Load Central Config
+def load_central_config():
+    config_path = os.path.join(root_dir, 'scout-config', 'config.yaml')
+    with open(config_path, 'r', encoding='utf-8') as f:
+        return yaml.safe_load(f)
+
+central_config = load_central_config()
+model_name = central_config['models']['primary_brain']
+
 api_key = os.getenv("GEMINI_API_KEY")
 
 if api_key:
@@ -29,9 +38,8 @@ if api_key:
 else:
     print("--- DEBUG: GEMINI_API_KEY is currently None ---")
 
-# Set the model name. Pydantic AI's GoogleModel prepends 'models/' internally.
-# Your API key has access to the experimental 'gemini-2.5-flash' model.
-model_to_use = GoogleModel('gemini-2.5-flash')
+# Set the model name from central config
+model_to_use = GoogleModel(model_name)
 
 if not api_key or api_key == "your_gemini_api_key_here":
     print("\n--- WARNING: No valid GEMINI_API_KEY found in .env ---")

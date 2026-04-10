@@ -46,11 +46,11 @@ Each POC folder is self-contained and follows this convention:
 
 ## Tech Stack
 
-- **Orchestration**: [n8n](https://n8n.io/) (self-hosted via `npx n8n`)
-- **LLM Brain**: Google Gemini 3.1 Flash Lite (via Google AI Studio Pay-As-You-Go)
+- **Orchestration**: [n8n](https://n8n.io/) & **LangGraph** (State management)
+- **LLM Brain**: Google Gemini 3.1 Flash Lite & **Amazon Bedrock (Nova/Claude)**
 - **Tunnel**: [Ngrok](https://ngrok.com/) with a static free domain (required for GitHub webhooks)
 - **Data Sources**: RSS feeds (OpenAI, Anthropic, Google AI, TLDR AI, Real Python, etc.)
-- **Language**: Python (venv or Jupyter)
+- **Language**: Python (venv or Jupyter), **Boto3**, & **LangChain**
 - **Tracking**: GitHub Issues → POC folders in this repo
 - **Smart Memory**: `user_preferences.json` auto-managed by a secondary Gemini Memory Agent
 
@@ -58,10 +58,12 @@ Each POC folder is self-contained and follows this convention:
 
 ## Pre-requisites
 
-- [ ] **n8n** installed via Node.js: `npm install -g n8n`
-- [ ] **Ngrok** installed globally: `npm install -g ngrok` — authenticated and with a **static free domain** claimed in the Ngrok dashboard
-- [ ] **Google AI Studio** API key (Gemini) — upgrade to Pay-As-You-Go to bypass 15 RPM free tier limits
-- [ ] **GitHub Personal Access Token** with full `repo` scope (required for private repos)
+- [ ] **n8n** installed via Node.js
+- [ ] **Ngrok** installed globally
+- [ ] **Google AI Studio** API key (Gemini)
+- [ ] **AWS Account** (Optional, for Bedrock experiments)
+- [ ] **GitHub Personal Access Token**
+- [ ] **LangGraph & LangChain** libraries (`pip install langgraph langchain-google-genai`)
 - [ ] Python 3.10+ with `pip`
 
 ### Launching the Agent (One Command)
@@ -90,5 +92,7 @@ To replicate the AI Scout logic in your own n8n instance:
 | 1 | [mcp-interactive-tool](./pocs/mcp-interactive-tool) | Interactive MCP Tool Integration (Issue #51) | Completed (Protocol Verified) |
 | 2 | [typesafe-llm-pydantic-ai](./pocs/typesafe-llm-pydantic-ai) | Type-Safe Structured output with **Pydantic AI** ([Learnings](./pocs/typesafe-llm-pydantic-ai/LEARNINGS.md)) | Completed |
 | 3 | [gpt-oss-safeguard-teen-safety](./pocs/gpt-oss-safeguard-teen-safety) | Teen Safety Middleware with **gpt-oss-safeguard-20b** — Groq & Ollama ([Learnings](./pocs/gpt-oss-safeguard-teen-safety/LEARNINGS.md)) | Completed |
+| 4 | [langgraph-stateful-agent](./pocs/langgraph-stateful-agent) | Multi-turn State Persistence with **LangGraph** ([Learnings](./pocs/langgraph-stateful-agent/LEARNINGS.md)) | Completed |
+
 
 > Update this table as POCs are added.

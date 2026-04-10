@@ -64,8 +64,19 @@ def load_user_preferences():
     except Exception as e:
         return f"Error loading preferences: {str(e)}"
 
+def load_central_config():
+    """Loads the main project configuration from config.yaml."""
+    config_path = os.path.join(current_dir, 'scout-config', 'config.yaml')
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        print(f"Error loading central config: {e}", file=sys.stderr)
+        return {"models": {"primary_brain": "gemini-2.0-flash", "temperature": 0.2}}
+
 # 1. Load Configurations
 config = load_config()
+central_config = load_central_config()
 user_pref_text = load_user_preferences()
 
 # 2. Inject User Context into the System Prompt
@@ -83,13 +94,14 @@ def append_activity_log(title: str, status: str, reasoning: str):
             f.write(log_entry)
     except Exception:
         pass # Never fail the agent due to logging issues
+    
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from pydantic_ai.models.google import GoogleModel
 
-# Set the established stable model
-model_name = 'gemini-2.5-flash'
+# Set the model from central config
+model_name = central_config['models']['primary_brain']
 model = GoogleModel(model_name)
 
 # 2. Define the Pydantic Schema that matches our n8n contract exactly
@@ -162,8 +174,8 @@ async def run_scout(title: str, snippet: str) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="Pydantic AI Scout Agent for RSS classification.")
-    parser.add_argument("--title", required=True, help="RSS Item Title")
-    parser.add_argument("--snippet", required=True, help="RSS Item Content Snippet")
+    parser.add_argument("--title", help="RSS Item Title")
+    parser.add_argument("--snippet", help="RSS Item Content Snippet")
     parser.add_argument("--test", action="store_true", help="Run a quick internal test.")
     
     args = parser.parse_args()
@@ -174,6 +186,8 @@ def main():
         asyncio.run(run_scout(test_title, test_snippet))
         print("Test cycle complete.")
         return
+    elif not args.title or not args.snippet:
+        parser.error("The following arguments are required: --title, --snippet (unless --test is used)")
 
     # Print ONLY clean JSON to stdout — n8n reads this
     # Redirect stderr to devnull to silence any remaining library warnings

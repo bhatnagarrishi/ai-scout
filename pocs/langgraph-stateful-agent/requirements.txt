@@ -1,0 +1,5 @@
+langgraph>=0.0.10
+langgraph-checkpoint-sqlite>=1.0.0
+langchain-google-genai>=1.0.0
+python-dotenv>=1.0.0
+PyYAML>=6.0.0
