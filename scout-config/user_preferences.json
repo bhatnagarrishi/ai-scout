@@ -24,6 +24,11 @@
       "item": "This project involves implementing a modular agentic loop using Python, OpenAI API, and Pydantic to orchestrate AI model calls, tool execution, and response parsing for autonomous task completion.",
       "reason": "The project taught a very conceptual lesson, indicating the user appreciates projects that provide deep conceptual understanding.",
       "weight": 1
+    },
+    {
+      "item": "This project builds a multi-step agent workflow with persistent conversation state using Amazon Bedrock's stateful runtime.",
+      "reason": "The user found the project conceptual and helpful for learning a new tool.",
+      "weight": 1
     }
   ],
   "negative_constraints": [
