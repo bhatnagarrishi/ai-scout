@@ -1,19 +1,14 @@
 {
   "positive_preferences": [
     {
-      "weight": 4,
-      "item": "Projects involving structured workflows, interactive tools for visualizing data (like Mermaid.js), and those compatible with or relevant to MCP (Microsoft Certified Professional) contexts.",
-      "reason": "Interested in structured workflows, visual components, and MCP projects."
+      "weight": 7,
+      "item": "Projects focused on building structured, repeatable, multi-step workflows, often involving agentic loops, persistent state, data visualization, and leading to deep conceptual understanding or teaching new tools, especially those relevant to MCP contexts.",
+      "reason": "Interested in structured, systematic, multi-step workflows, agentic loops, visual components, and projects that provide deep conceptual understanding or teach new tools, including those relevant to MCP."
     },
     {
       "item": "This project implements a Python-based middleware for AI content moderation using gpt-oss-safeguard to ensure age-appropriate interactions for teens.",
       "reason": "The user finds this a good use of technology for a good social cause and is very interested in such items.",
       "weight": 1
-    },
-    {
-      "weight": 2,
-      "item": "Projects that provide deep conceptual understanding or teach new tools, often involving modular agentic loops or multi-step agent workflows with persistent state.",
-      "reason": "Appreciates projects that provide deep conceptual understanding or teach new tools."
     },
     {
       "item": "This project builds a Python-based monitoring wrapper using LangChain and OpenAI API to extract and evaluate intermediate reasoning steps from an LLM to detect hallucinations or logic failures.",
