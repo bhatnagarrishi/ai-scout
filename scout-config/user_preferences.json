@@ -1,18 +1,8 @@
 {
   "positive_preferences": [
     {
-      "weight": 1,
-      "item": "Projects that provide interactive tools for visualizing data, especially those related to MCP.",
-      "reason": "Interested in MCP projects"
-    },
-    {
-      "item": "An interactive tool designed for visualizing data in MCP projects.",
-      "weight": 1,
-      "reason": "Interested in MCP projects"
-    },
-    {
-      "item": "The project involves integrating interactive tools, likely related to MCP (Microsoft Certified Professional) technologies.",
-      "weight": 1,
+      "weight": 3,
+      "item": "Projects involving interactive tools for visualizing data, particularly within MCP (Microsoft Certified Professional) contexts.",
       "reason": "Interested in MCP projects"
     },
     {
@@ -21,14 +11,9 @@
       "weight": 1
     },
     {
-      "item": "This project involves implementing a modular agentic loop using Python, OpenAI API, and Pydantic to orchestrate AI model calls, tool execution, and response parsing for autonomous task completion.",
-      "reason": "The project taught a very conceptual lesson, indicating the user appreciates projects that provide deep conceptual understanding.",
-      "weight": 1
-    },
-    {
-      "item": "This project builds a multi-step agent workflow with persistent conversation state using Amazon Bedrock's stateful runtime.",
-      "reason": "The user found the project conceptual and helpful for learning a new tool.",
-      "weight": 1
+      "weight": 2,
+      "item": "Projects that provide deep conceptual understanding or teach new tools, often involving modular agentic loops or multi-step agent workflows with persistent state.",
+      "reason": "Appreciates projects that provide deep conceptual understanding or teach new tools."
     },
     {
       "item": "This project builds a Python-based monitoring wrapper using LangChain and OpenAI API to extract and evaluate intermediate reasoning steps from an LLM to detect hallucinations or logic failures.",
@@ -43,19 +28,14 @@
   ],
   "negative_constraints": [
     {
-      "item": "The project explains how to perform unit testing using Python's unittest.mock module.",
-      "weight": 1,
-      "reason": "Not interested in unit testing projects"
+      "weight": 2,
+      "item": "Projects focused on unit testing, particularly using Python's unittest.mock module to simulate API responses or test AI-driven logic.",
+      "reason": "Not interested in unit testing projects/concepts."
     },
     {
       "item": "The project is a tool for concurrently downloading economic data.",
       "weight": 1,
       "reason": "Although interesting, its too low level and narrow use case. There is no specific tool that I would learn from this, except using AI to code"
-    },
-    {
-      "item": "This project teaches how to use Python's unittest.mock to simulate external API responses for reliable unit testing of AI-driven logic.",
-      "reason": "User is not interested in unit tests.",
-      "weight": 1
     }
   ]
 }
