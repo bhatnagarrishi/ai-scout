@@ -1,0 +1,29 @@
+{
+    "territories": {
+        "New Delhi": {
+            "market_potential": "Excellent",
+            "narrative_focus": "Hyper-localization to build community pulse and generate long-term goodwill.",
+            "constraints": [
+                {
+                    "id": "SUPPLY_001",
+                    "truth": "To ensure maximum goodwill and freshness, 90% of raw vegetables (potatoes, peas) MUST be sourced from local Mandis (wholesale markets) in the NCR region.",
+                    "logic_keyword": "supply"
+                },
+                {
+                    "id": "QUALITY_002",
+                    "truth": "While ingredients are local, the 'Secret Spice Blend' and 'Cooking Temperature Standards' are governed by CENTRAL HQ rules to ensure brand consistency.",
+                    "logic_keyword": "quality"
+                },
+                {
+                    "id": "SOCIAL_003",
+                    "truth": "To get a 'pulse' of the crowd, each shop must feature a 'Flavor of the Month' decided by local neighborhood voting.",
+                    "logic_keyword": "pulse"
+                }
+            ]
+        }
+    },
+    "strategic_priorities": [
+        "Community-first growth through localized supply chains",
+        "Absolute quality governance via central standards"
+    ]
+}
