@@ -29,6 +29,11 @@
       "item": "This project builds a multi-step agent workflow with persistent conversation state using Amazon Bedrock's stateful runtime.",
       "reason": "The user found the project conceptual and helpful for learning a new tool.",
       "weight": 1
+    },
+    {
+      "item": "This project builds a Python-based monitoring wrapper using LangChain and OpenAI API to extract and evaluate intermediate reasoning steps from an LLM to detect hallucinations or logic failures.",
+      "reason": "The user is interested in the novel concept of a chain-of-thought monitor for LLMs.",
+      "weight": 1
     }
   ],
   "negative_constraints": [
