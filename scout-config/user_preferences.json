@@ -1,9 +1,9 @@
 {
   "positive_preferences": [
     {
-      "weight": 3,
-      "item": "Projects involving interactive tools for visualizing data, particularly within MCP (Microsoft Certified Professional) contexts.",
-      "reason": "Interested in MCP projects"
+      "weight": 4,
+      "item": "Projects involving structured workflows, interactive tools for visualizing data (like Mermaid.js), and those compatible with or relevant to MCP (Microsoft Certified Professional) contexts.",
+      "reason": "Interested in structured workflows, visual components, and MCP projects."
     },
     {
       "item": "This project implements a Python-based middleware for AI content moderation using gpt-oss-safeguard to ensure age-appropriate interactions for teens.",
