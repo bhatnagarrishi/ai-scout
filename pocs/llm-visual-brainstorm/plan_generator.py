@@ -13,7 +13,11 @@ if not load_dotenv(os.path.join(os.path.dirname(__file__), '../../.env')):
 MODEL_NAME = "gpt-4o-mini"
 OUTPUT_FILE = os.path.join(os.path.dirname(__file__), "output.md")
 
-llm = ChatOpenAI(model=MODEL_NAME, temperature=0.7)
+llm = ChatOpenAI(
+    model=MODEL_NAME, 
+    temperature=0.7,
+    default_headers={"OpenAI-Project": os.getenv("OPENAI_PROJECT")}
+)
 
 def generate_brainstorm(topic: str) -> str:
     system_prompt = (

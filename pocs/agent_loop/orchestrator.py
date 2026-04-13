@@ -10,7 +10,7 @@ class ModelOrchestrator:
     def __init__(self, system_prompt: str, tools: List[Any], model: str = "gpt-4o"):
         load_dotenv()
         api_key = os.getenv("OPENAI_API_KEY")
-        self.client = OpenAI(api_key=api_key)
+        self.client = OpenAI(api_key=api_key, project=os.getenv("OPENAI_PROJECT"))
         self.model = model
         self.system_prompt = system_prompt
         self.tools = {t.name: t for t in tools}

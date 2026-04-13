@@ -41,7 +41,8 @@ def get_market_data():
 llm = ChatOpenAI(
     model=MODEL_NAME, 
     temperature=0, 
-    openai_api_key=os.getenv("OPENAI_API_KEY")
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
+    default_headers={"OpenAI-Project": os.getenv("OPENAI_PROJECT")}
 )
 
 def run_strategy_session():

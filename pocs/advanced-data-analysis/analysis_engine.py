@@ -9,8 +9,7 @@ from dotenv import load_dotenv
 root_dir = Path(__file__).resolve().parent.parent.parent
 dotenv_path = root_dir / '.env'
 load_dotenv(dotenv_path=dotenv_path)
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), project=os.getenv("OPENAI_PROJECT"))
 
 # Directories
 script_dir = Path(__file__).resolve().parent
