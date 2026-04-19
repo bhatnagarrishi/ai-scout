@@ -31,6 +31,10 @@
       "item": "The project is a tool for concurrently downloading economic data.",
       "weight": 1,
       "reason": "Although interesting, its too low level and narrow use case. There is no specific tool that I would learn from this, except using AI to code"
+    },
+    {
+      "item": "Projects that primarily involve generating UI elements or reports, especially automated data profiling that feels like 'UI generation with AI'.",
+      "reason": "Not interesting enough, perceived as mostly UI generation with AI."
     }
   ]
 }
