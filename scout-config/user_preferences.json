@@ -1,36 +1,26 @@
 {
   "positive_preferences": [
     {
-      "weight": 7,
-      "item": "Projects focused on building structured, repeatable, multi-step workflows, often involving agentic loops, persistent state, data visualization, and leading to deep conceptual understanding or teaching new tools, especially those relevant to MCP contexts.",
-      "reason": "Interested in structured, systematic, multi-step workflows, agentic loops, visual components, and projects that provide deep conceptual understanding or teach new tools, including those relevant to MCP."
+      "weight": 16,
+      "item": "Projects focused on building agentic loops, multi-step workflows, and custom AI tools (e.g., Chrome extensions, CLIs, MCP tools, or voice interfaces) using frameworks like LangChain and Python for practical, high-utility use cases.",
+      "reason": "The user prioritizes building functional, repeatable toolsets and agentic systems that provide deep technical insights and teach practical skills for integrating AI into development environments."
     },
     {
-      "item": "This project implements a Python-based middleware for AI content moderation using gpt-oss-safeguard to ensure age-appropriate interactions for teens.",
-      "reason": "The user finds this a good use of technology for a good social cause and is very interested in such items.",
-      "weight": 1
-    },
-    {
-      "item": "This project builds a Python-based monitoring wrapper using LangChain and OpenAI API to extract and evaluate intermediate reasoning steps from an LLM to detect hallucinations or logic failures.",
-      "reason": "The user is interested in the novel concept of a chain-of-thought monitor for LLMs.",
-      "weight": 1
-    },
-    {
-      "item": "This project involves building a real-time, voice-first AI companion using a streaming LLM backend with Python, OpenAI API, PyAudio, and LangChain.",
-      "reason": "The user likes the new tech stack presented in the project details.",
-      "weight": 2
+      "weight": 1,
+      "item": "AI-based middleware and safeguard projects focused on social causes, such as ensuring age-appropriate interactions for teens.",
+      "reason": "The user finds technology applied to positive social causes highly interesting."
     }
   ],
   "negative_constraints": [
     {
       "weight": 2,
-      "item": "Projects focused on unit testing, particularly using Python's unittest.mock module to simulate API responses or test AI-driven logic.",
-      "reason": "Not interested in unit testing projects/concepts."
+      "item": "Projects focused on software testing, specifically unit testing and mocking API responses using Python's unittest.mock.",
+      "reason": "Not interested in unit testing projects or concepts."
     },
     {
-      "item": "The project is a tool for concurrently downloading economic data.",
-      "weight": 1,
-      "reason": "Although interesting, its too low level and narrow use case. There is no specific tool that I would learn from this, except using AI to code"
+      "weight": 2,
+      "item": "Projects with narrow utility, low-level data processing, or a primary focus on automated UI and report generation.",
+      "reason": "The user perceives these as lacking sufficient technical depth or the opportunity to learn significant new tools and frameworks."
     }
   ]
 }
