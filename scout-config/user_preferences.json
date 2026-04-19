@@ -2,23 +2,23 @@
   "positive_preferences": [
     {
       "weight": 12,
-      "item": "Projects focused on building structured, repeatable, multi-step workflows, often involving agentic loops, persistent state, data visualization, and leading to deep conceptual understanding or teaching/integrating new CLIs or development tools, especially those relevant to MCP contexts or for building custom automation.",
-      "reason": "Interested in structured, systematic, multi-step workflows, agentic loops, visual components, and projects that provide deep conceptual understanding or teach/integrate new tools/CLIs for development automation, including those relevant to MCP and building custom toolsets."
+      "item": "Projects focused on building structured, repeatable, multi-step workflows, agentic loops, and custom toolsets through the integration of new CLIs or development tools (e.g., Gemini CLI, MCP) for automation and deep conceptual understanding.",
+      "reason": "The user is interested in leveraging new tools, CLIs, and systematic workflows to build personalized automation toolsets and gain deep technical insights into integrating development environments with AI."
     },
     {
+      "weight": 1,
       "item": "This project implements a Python-based middleware for AI content moderation using gpt-oss-safeguard to ensure age-appropriate interactions for teens.",
-      "reason": "The user finds this a good use of technology for a good social cause and is very interested in such items.",
-      "weight": 1
+      "reason": "The user finds this a good use of technology for a good social cause and is very interested in such items."
     },
     {
+      "weight": 1,
       "item": "This project builds a Python-based monitoring wrapper using LangChain and OpenAI API to extract and evaluate intermediate reasoning steps from an LLM to detect hallucinations or logic failures.",
-      "reason": "The user is interested in the novel concept of a chain-of-thought monitor for LLMs.",
-      "weight": 1
+      "reason": "The user is interested in the novel concept of a chain-of-thought monitor for LLMs."
     },
     {
+      "weight": 2,
       "item": "This project involves building a real-time, voice-first AI companion using a streaming LLM backend with Python, OpenAI API, PyAudio, and LangChain.",
-      "reason": "The user likes the new tech stack presented in the project details.",
-      "weight": 2
+      "reason": "The user likes the new tech stack presented in the project details."
     }
   ],
   "negative_constraints": [
@@ -28,11 +28,12 @@
       "reason": "Not interested in unit testing projects/concepts."
     },
     {
-      "item": "The project is a tool for concurrently downloading economic data.",
       "weight": 1,
+      "item": "The project is a tool for concurrently downloading economic data.",
       "reason": "Although interesting, its too low level and narrow use case. There is no specific tool that I would learn from this, except using AI to code"
     },
     {
+      "weight": 1,
       "item": "Projects that primarily involve generating UI elements or reports, especially automated data profiling that feels like 'UI generation with AI'.",
       "reason": "Not interesting enough, perceived as mostly UI generation with AI."
     }
