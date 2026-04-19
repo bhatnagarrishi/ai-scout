@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Mode — Page Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <link rel="stylesheet" href="panel.css" />
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <header class="panel-header">
+    <div class="header-logo">
+      <div class="logo-orb"></div>
+      <span class="logo-text">AI Mode</span>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge--status" id="status-badge">Idle</span>
+    </div>
+  </header>
+
+  <!-- ── Scrollable top area ────────────────────────────────────── -->
+  <div class="top-scroll-area">
+
+    <!-- ── Page Context Card ───────────────────────────────────────── -->
+    <section class="page-card" id="page-card">
+
+      <!-- Card header row: always visible, has collapse toggle -->
+      <div class="page-card__header" id="page-card-header">
+        <div class="page-card__meta" id="page-card-meta">
+          <span class="page-type-badge" id="content-type-badge">—</span>
+          <span class="page-read-time" id="read-time">— min read</span>
+          <span class="page-sentiment" id="sentiment-badge">—</span>
+        </div>
+        <button class="btn-collapse" id="btn-collapse" title="Collapse summary" aria-expanded="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="collapse-icon">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Skeleton loading -->
+      <div class="page-card__skeleton" id="page-skeleton">
+        <div class="skeleton-line skeleton-line--wide"></div>
+        <div class="skeleton-line skeleton-line--medium"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+      </div>
+
+      <!-- Collapsible body -->
+      <div class="page-card__body" id="page-card-body">
+        <div class="page-card__content" id="page-content" style="display:none">
+          <h2 class="page-title" id="page-title">Loading...</h2>
+          <p class="page-summary" id="page-summary"></p>
+          <div class="topic-pills" id="topic-pills"></div>
+        </div>
+        <div class="page-card__error" id="page-error" style="display:none">
+          <span class="error-icon">⚠️</span>
+          <span id="error-msg">Could not analyze this page.</span>
+          <button class="btn-retry" id="btn-retry">Retry</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── Command Chips ───────────────────────────────────────────── -->
+    <section class="command-chips" id="command-chips">
+      <button class="chip" id="chip-summarize" data-command="Give me a concise 3-point summary of this page.">
+        <span class="chip-icon">📝</span> Summarize
+      </button>
+      <button class="chip" id="chip-tables" data-command="Extract all data tables from this page.">
+        <span class="chip-icon">📊</span> Tables
+      </button>
+      <button class="chip" id="chip-arguments" data-command="What are the main arguments and claims made on this page?">
+        <span class="chip-icon">🧠</span> Arguments
+      </button>
+      <button class="chip" id="chip-links" data-command="Categorize the links on this page.">
+        <span class="chip-icon">🔗</span> Links
+      </button>
+      <button class="chip chip--graph" id="chip-graph" data-command="visualize">
+        <span class="chip-icon">🕸️</span> Visualize
+      </button>
+    </section>
+
+    <!-- ── Graph Visualization ─────────────────────────────────────── -->
+    <section class="graph-section" id="graph-section" style="display:none">
+      <div class="graph-header">
+        <span class="graph-title">Content Relationship Graph</span>
+        <button class="btn-close-graph" id="btn-close-graph">✕</button>
+      </div>
+      <div class="graph-container" id="graph-container">
+        <div class="graph-loading" id="graph-loading">
+          <div class="spinner"></div>
+          <span>Mapping relationships…</span>
+        </div>
+        <svg id="graph-svg"></svg>
+      </div>
+      <div class="graph-legend">
+        <span class="legend-item"><span class="legend-dot dot--topic"></span>Topic</span>
+        <span class="legend-item"><span class="legend-dot dot--concept"></span>Concept</span>
+        <span class="legend-item"><span class="legend-dot dot--entity"></span>Entity</span>
+        <span class="legend-item"><span class="legend-dot dot--claim"></span>Claim</span>
+      </div>
+    </section>
+
+  </div><!-- /top-scroll-area -->
+
+  <!-- ── Chat Interface — always anchored at bottom ─────────────── -->
+  <section class="chat-section">
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-message chat-message--ai" id="welcome-msg">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble">
+          Page analyzed above ↑ — use the chips or ask me anything about it here.
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <textarea
+        id="chat-input"
+        class="chat-input"
+        placeholder="Ask anything about this page…"
+        rows="1"
+      ></textarea>
+      <button class="btn-send" id="btn-send" title="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <script src="panel.js"></script>
+</body>
+</html>

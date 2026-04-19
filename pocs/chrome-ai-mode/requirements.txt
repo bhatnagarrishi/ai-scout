@@ -1,0 +1,12 @@
+# Requirements — Chrome AI Mode Backend
+# Tested with Python 3.13 in shared repo venv (.venv at repo root)
+# Actual installed versions as of 2026-04-19 shown in comments
+
+fastapi>=0.100.0          # 0.136.0 installed
+uvicorn[standard]>=0.29.0 # 0.44.0 installed
+langchain>=0.3.0          # 1.2.15 installed — NOTE: >=1.0 uses LangGraph, not AgentExecutor
+langchain-openai>=0.2.0   # 1.1.14 installed
+openai>=1.40.0            # 2.31.0 installed
+python-dotenv>=1.0.0      # reads root .env for OPENAI_API_KEY
+pydantic>=2.9.0           # shared with rest of repo
+langgraph>=1.0.0          # 1.1.8 installed — provides create_react_agent (replaces old AgentExecutor)
