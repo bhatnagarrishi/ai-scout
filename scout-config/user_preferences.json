@@ -1,9 +1,9 @@
 {
   "positive_preferences": [
     {
-      "weight": 11,
+      "weight": 12,
       "item": "Projects focused on building structured, repeatable, multi-step workflows, often involving agentic loops, persistent state, data visualization, and leading to deep conceptual understanding or teaching/integrating new CLIs or development tools, especially those relevant to MCP contexts or for building custom automation.",
-      "reason": "Interested in structured, systematic, multi-step workflows, agentic loops, visual components, and projects that provide deep conceptual understanding or teach/integrate new tools/CLIs for development automation, including those relevant to MCP."
+      "reason": "Interested in structured, systematic, multi-step workflows, agentic loops, visual components, and projects that provide deep conceptual understanding or teach/integrate new tools/CLIs for development automation, including those relevant to MCP and building custom toolsets."
     },
     {
       "item": "This project implements a Python-based middleware for AI content moderation using gpt-oss-safeguard to ensure age-appropriate interactions for teens.",
