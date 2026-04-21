@@ -21,6 +21,11 @@
       "weight": 2,
       "item": "Projects with narrow utility, low-level data processing, or a primary focus on automated UI and report generation.",
       "reason": "The user perceives these as lacking sufficient technical depth or the opportunity to learn significant new tools and frameworks."
+    },
+    {
+      "weight": 1,
+      "item": "Projects dependent on AWS Bedrock or cloud services with significant setup and instantiation friction.",
+      "reason": "The user reported specific issues with instantiating Bedrock and wishes to avoid it in future architectures."
     }
   ]
 }
